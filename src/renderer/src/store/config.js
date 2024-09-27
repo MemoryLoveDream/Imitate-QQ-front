@@ -4,10 +4,10 @@ import { ref } from 'vue'
 export const useConfigStore = defineStore(
   'config',
   () => {
-    const chat_history_location = ref('E:/project/Vue/easychat-front/config/users/')
+    const chatHistoryLocation = ref('E:/project/Vue/easychat-front/config/users/')
 
     return {
-      chat_history_location
+      chatHistoryLocation
     }
   },
   { persist: true }

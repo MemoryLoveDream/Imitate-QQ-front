@@ -4,12 +4,12 @@ import { onMounted, ref } from 'vue'
 import { useUserStore } from '../store/user'
 import { useComponentsStore } from '../store/components'
 
-const user = useUserStore()
-const components = useComponentsStore()
+const userStore = useUserStore()
+const componentsStore = useComponentsStore()
 const tabs = ref()
 
 onMounted(() => {
-  components.tabs = tabs.value
+  componentsStore.tabs = tabs.value
 })
 </script>
 
@@ -18,7 +18,7 @@ onMounted(() => {
     <el-avatar
       class="avatar"
       :size="35"
-      :src="user.current_user.head_url"
+      :src="userStore.currentUser.headUrl"
       style="user-select: none"
     />
     <Tabs ref="tabs" />

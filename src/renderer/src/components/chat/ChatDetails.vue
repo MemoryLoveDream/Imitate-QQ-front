@@ -1,12 +1,10 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import Chat from './Chat.vue'
-import { useChatStore } from '../../store/chat'
+import { useRelationshipStore } from '../../store/relationship'
 import { useWebSocketStore } from '../../store/webSocket'
-import { useUserStore } from '../../store/user'
 
-const user = useUserStore()
-const chat = useChatStore()
+const relationshipStore = useRelationshipStore()
 const ws = useWebSocketStore()
 const scrollbar = ref()
 const inner = ref()
@@ -31,7 +29,7 @@ function addChat(chat) {
 
 function sendChat(chat) {
   addChat(chat)
-  chat.receiver_id = user.current_partner.id
+  chat.receiver_id = relationshipStore.singleInformation.id
   ws.sendMessage(chat)
 }
 
@@ -47,7 +45,7 @@ onMounted(() => {
     <el-scrollbar ref="scrollbar">
       <div ref="inner" :key="n">
         <Chat
-          v-for="(chat1, index) in chat.getChatHistory()"
+          v-for="(chat1, index) in relationshipStore.getChatHistory()"
           :key="index"
           class="row"
           :chat="chat1"

@@ -3,12 +3,11 @@ import { ref, watch } from 'vue'
 import { Plus, Search } from '@element-plus/icons-vue'
 import Message from './Message.vue'
 import router from '../../router'
-import { useUserStore } from '../../store/user'
-import { useChatStore } from '../../store/chat'
 import { useComponentsStore } from '../../store/components'
+import { useRelationshipStore } from '../../store/relationship'
+import axios from 'axios'
 
-const user = useUserStore()
-const chat = useChatStore()
+const relationshipStore = useRelationshipStore()
 const components = useComponentsStore()
 
 const text = ref('')
@@ -19,12 +18,14 @@ watch(selected, () => router.replace('/main/two/message'), { once: true })
 
 function afterSelect(n, id) {
   if (selected.value !== n) {
-    if (selected.value !== -1) {
-      messagesRef.value[selected.value].setInactive()
-      user.change_partner(id)
-      components.refreshChatHistory()
-    } else user.change_partner(id)
-    selected.value = n
+    axios.get('/user/info?id=' + id).then((response) => {
+      relationshipStore.singleInformation = response.data.data
+      if (selected.value !== -1) {
+        messagesRef.value[selected.value].setInactive()
+        components.refreshChatHistory()
+      }
+      selected.value = n
+    })
   }
 }
 </script>
@@ -36,7 +37,7 @@ function afterSelect(n, id) {
   </el-button>
   <div class="messages">
     <Message
-      v-for="(message, index) in chat.messageList"
+      v-for="(message, index) in relationshipStore.messageList"
       ref="messagesRef"
       :key="index"
       :n="index"

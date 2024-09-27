@@ -5,14 +5,26 @@ import { ref } from 'vue'
 import { CloseBold } from '@element-plus/icons-vue'
 import FunctionalInput from '../../components/input/FunctionalInput.vue'
 import { useUserStore } from '../../store/user'
+import axios from 'axios'
 
-const user = useUserStore()
-const head_url = ref('/src/assets/pic/head/head.png')
-// const file = ref()
+const userStore = useUserStore()
+const headUrl = ref('/src/assets/pic/head/head.png')
+const input = ref()
+const password = ref()
 
 function register() {
-  router.replace('/main')
-  window.api.change_size()
+  axios
+    .post('/user/register', { id: input.value.text, password: password.value.text })
+    .then((response) => {
+      if (response.data.code === 200) {
+        router.replace('/main')
+        window.api.change_size()
+        axios.get('/user/info?id=' + input.value.text).then((response) => {
+          userStore.currentUser = response.data.data
+          userStore.updateLatestLoginedUser(response.data.data, password.value.text)
+        })
+      }
+    })
 }
 
 function change(url) {
@@ -20,7 +32,7 @@ function change(url) {
 }
 
 function change_head() {
-  head_url.value =
+  headUrl.value =
     'img:///' +
     window.api.select_file({
       properties: ['openFile']
@@ -45,11 +57,11 @@ function change_head() {
 <template>
   <div class="background">
     <CloseButton />
-    <el-avatar class="head" :size="80" :src="head_url" @click="change_head" />
-    <FunctionalInput class="select" placeholder="输入账号">
+    <el-avatar class="head" :size="80" :src="headUrl" @click="change_head" />
+    <FunctionalInput class="input" placeholder="输入账号">
       <CloseBold />
     </FunctionalInput>
-    <FunctionalInput class="input" placeholder="输入密码" type="password">
+    <FunctionalInput class="password" placeholder="输入密码" type="password">
       <CloseBold />
     </FunctionalInput>
     <el-button class="register" color="dodgerblue" @click="register">注册</el-button>

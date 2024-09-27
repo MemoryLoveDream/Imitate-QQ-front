@@ -5,27 +5,27 @@ export const useComponentsStore = defineStore(
   'components',
   () => {
     const tabs = ref()
-    const chat_details = ref()
+    const chatDetails = ref()
 
     function changeTab(index) {
       tabs.value.changeTab(index)
     }
 
     function addChat(chat) {
-      chat_details.value.addChat(chat)
+      chatDetails.value.addChat(chat)
     }
 
     function sendChat(chat) {
-      chat_details.value.sendChat(chat)
+      chatDetails.value.sendChat(chat)
     }
 
     function refreshChatHistory() {
-      chat_details.value.refresh()
+      chatDetails.value.refresh()
     }
 
     return {
       tabs,
-      chat_details,
+      chatDetails,
       changeTab,
       addChat,
       sendChat,

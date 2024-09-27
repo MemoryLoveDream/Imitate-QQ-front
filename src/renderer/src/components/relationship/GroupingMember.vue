@@ -51,7 +51,7 @@ defineExpose({ setInactive })
 
 <template>
   <div :class="message_class" @mouseover="mouseOver" @mouseout="mouseOut" @click="click">
-    <el-avatar class="head" :size="40" :src="props.info.head_url" />
+    <el-avatar class="head" :size="40" :src="props.info.headUrl" />
     <div v-if="props.info.type === 'single'">
       <div id="nickname_id" :class="nickname_class">
         {{ props.info.nickname }}

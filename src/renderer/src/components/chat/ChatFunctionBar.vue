@@ -1,9 +1,9 @@
 <script setup>
 import HoverableIcon from '../base/HoverableIcon.vue'
 import { reactive } from 'vue'
-import { useUserStore } from '../../store/user'
+import { useRelationshipStore } from '../../store/relationship'
 
-const user = useUserStore()
+const relationshipStore = useRelationshipStore()
 const icons = reactive([
   {
     name: 'more',
@@ -25,7 +25,7 @@ const icons = reactive([
 
 <template>
   <div class="chat-function-bar">
-    <div class="nickname">{{ user.current_partner.nickname }}</div>
+    <div class="nickname">{{ relationshipStore.singleInformation.nickname }}</div>
     <div class="icons">
       <HoverableIcon v-for="icon in icons" :key="icon.name" class="icon" :urls="icon" />
     </div>

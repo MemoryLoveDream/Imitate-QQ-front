@@ -5,15 +5,15 @@ import router from '../../router'
 import { useUserStore } from '../../store/user'
 
 const userStore = useUserStore()
-const { id, nickname, head_url, password } = userStore.latestLoginedUser
+const { id, nickname, headUrl, password } = userStore.latestLoginedUser
 
 function fastLogin() {
   axios.post('/user/login', { id: id, password: password }).then((response) => {
     if (response.data.code === 200) {
       router.replace('/main')
       window.api.change_size()
-      axios.get('/user/info?id=1000000000').then((response) => {
-        console.log(response.data.data)
+      axios.get('/user/info?id=' + id).then((response) => {
+        userStore.currentUser = response.data.data
       })
     }
   })
@@ -28,7 +28,7 @@ function change(url) {
   <div class="background">
     <CloseButton />
     <div class="logo">逛逛</div>
-    <el-avatar class="head" :size="100" :src="head_url" />
+    <el-avatar class="head" :size="100" :src="headUrl" />
     <div class="nickname">{{ nickname }}</div>
     <el-button class="login" color="dodgerblue" @click="fastLogin">登录</el-button>
     <div class="add_account" @click="change('/login')">切换账号</div>

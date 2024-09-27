@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import CloseButton from '../../components/base/CloseButton.vue'
 import FunctionalInput from '../../components/input/FunctionalInput.vue'
 import SelectInput from '../../components/input/SelectInput.vue'
@@ -7,11 +7,13 @@ import { CloseBold } from '@element-plus/icons-vue'
 import { useUserStore } from '../../store/user'
 import router from '../../router'
 import axios from 'axios'
+import { ElMessage } from 'element-plus'
 
 const userStore = useUserStore()
-const head_url = ref('/src/assets/pic/head/head.png')
+const headUrl = ref('/src/assets/pic/head/head.png')
 const select = ref()
 const password = ref()
+const map = ref(new Map())
 
 function login() {
   axios
@@ -20,11 +22,12 @@ function login() {
       if (response.data.code === 200) {
         router.replace('/main')
         window.api.change_size()
-        axios.get('/user/info?id=1000000000').then((response) => {
-          console.log(response.data.data)
+        axios.get('/user/info?id=' + select.value.text).then((response) => {
+          userStore.currentUser = response.data.data
+          userStore.updateLatestLoginedUser(response.data.data, password.value.text)
         })
-        // userStore.latest_logined_user =
       }
+      ElMessage({ type: 'warning', message: '账号或密码错误' })
     })
 }
 
@@ -32,16 +35,29 @@ function change(url) {
   router.replace(url)
 }
 
-function change_head(text) {
-  head_url.value = text
+function handleChange(id) {
+  map.value = userStore.loginedUsersMap()
+  if (map.value.has(Number(id))) headUrl.value = map.value.get(Number(id)).headUrl
+  else headUrl.value = '/src/assets/pic/head/head.png'
+}
+
+function deleteItem(index) {
+  userStore.loginedUsers.splice(index, 1)
 }
 </script>
 
 <template>
   <div class="background">
     <CloseButton />
-    <el-avatar class="head" :size="80" :src="head_url" />
-    <SelectInput ref="select" class="select" placeholder="输入账号" :handle-change="change_head" />
+    <el-avatar class="head" :size="80" :src="headUrl" />
+    <SelectInput
+      ref="select"
+      class="select"
+      placeholder="输入账号"
+      :selectable-items="userStore.loginedUsers"
+      @handle-change="handleChange"
+      @delete-item="deleteItem"
+    />
     <FunctionalInput ref="password" class="input" placeholder="输入密码" type="password">
       <CloseBold />
     </FunctionalInput>

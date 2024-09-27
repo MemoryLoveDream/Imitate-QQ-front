@@ -11,7 +11,7 @@ defineExpose({ hello, sayHello })
 </script>
 
 <template>
-  <div class="l">ajjsjjd</div>
+  <div class="l">Hello World!</div>
 </template>
 
 <style scoped></style>

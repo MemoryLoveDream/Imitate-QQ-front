@@ -5,8 +5,8 @@ import { useUserStore } from '../../store/user'
 import { useComponentsStore } from '../../store/components'
 import { dateString } from '../../utils/date'
 
-const user = useUserStore()
-const components = useComponentsStore()
+const userStore = useUserStore()
+const componentsStore = useComponentsStore()
 
 const icons = reactive([
   {
@@ -34,10 +34,10 @@ const text = ref('')
 const disabled = ref(true)
 
 function sendMessage() {
-  components.sendChat({
-    sender_id: user.current_user.id,
-    head_url: user.current_user.head_url,
-    send_time: dateString(),
+  componentsStore.sendChat({
+    senderId: userStore.currentUser.id,
+    headUrl: userStore.currentUser.headUrl,
+    sendTime: dateString(),
     type: 'text',
     content: text.value
   })

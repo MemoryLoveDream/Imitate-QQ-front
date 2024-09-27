@@ -4,13 +4,13 @@ import PersonalInformation from '../../components/information/PersonalInformatio
 import GroupInformation from '../../components/information/GroupInformation.vue'
 import { useRelationshipStore } from '../../store/relationship'
 
-const relationship = useRelationshipStore()
+const relationshipStore = useRelationshipStore()
 </script>
 
 <template>
   <div class="information-block">
-    <PersonalInformation v-show="relationship.type === 'single'" class="card" />
-    <GroupInformation v-show="relationship.type === 'group'" class="card" />
+    <PersonalInformation v-show="relationshipStore.relationshipType === 'single'" class="card" />
+    <GroupInformation v-show="relationshipStore.relationshipType === 'group'" class="card" />
     <WindowButtons />
   </div>
 </template>

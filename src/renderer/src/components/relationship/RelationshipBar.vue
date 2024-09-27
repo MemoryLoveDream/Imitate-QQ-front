@@ -5,7 +5,7 @@ import RelationshipGrouping from './RelationshipGrouping.vue'
 import router from '../../router'
 import { useRelationshipStore } from '../../store/relationship'
 
-const relationship = useRelationshipStore()
+const relationshipStore = useRelationshipStore()
 const text = ref('')
 const type = ref('single')
 const singleGroupingsRef = ref([])
@@ -27,7 +27,7 @@ function afterSelect(code, info) {
     }
     selected.value = { n1: code.n1, n2: code.n2, n3: code.n3 }
   }
-  relationship.type = info.type
+  relationshipStore.relationshipType = info.type
 }
 </script>
 
@@ -51,7 +51,7 @@ function afterSelect(code, info) {
   <div class="groupings">
     <div v-show="type === 'single'">
       <RelationshipGrouping
-        v-for="(grouping, index) in relationship.single_grouping"
+        v-for="(grouping, index) in relationshipStore.singleGrouping"
         ref="singleGroupingsRef"
         :key="index"
         :code="{ n1: 1, n2: index }"
@@ -62,7 +62,7 @@ function afterSelect(code, info) {
     </div>
     <div v-show="type === 'group'">
       <RelationshipGrouping
-        v-for="(grouping, index) in relationship.group_grouping"
+        v-for="(grouping, index) in relationshipStore.groupGrouping"
         ref="groupGroupingsRef"
         :key="index"
         :code="{ n1: 2, n2: index }"

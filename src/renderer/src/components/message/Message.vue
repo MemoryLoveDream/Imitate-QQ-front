@@ -59,13 +59,13 @@ defineExpose({ setInactive })
       @mouseout="mouseOut"
       @click="click"
     >
-      <el-avatar class="head" :size="40" :src="props.message.head_url" />
+      <el-avatar class="head" :size="40" :src="props.message.headUrl" />
       <div id="nickname_id" :class="nickname_class">
         {{ props.message.nickname }}
       </div>
       <div id="date_id" :class="date_class">{{ props.message.date }}</div>
       <div id="latest_message_id" :class="latest_message_class">
-        {{ props.message.latest_message }}
+        {{ props.message.latestMessage }}
       </div>
     </div>
   </el-badge>

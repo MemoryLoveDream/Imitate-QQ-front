@@ -3,18 +3,18 @@ import { ElConfigProvider } from 'element-plus'
 import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import { onBeforeMount, reactive } from 'vue'
 import { useUserStore } from './store/user'
-import { useChatStore } from './store/chat'
 import { useWebSocketStore } from './store/webSocket'
+import { useRelationshipStore } from './store/relationship'
 
 const locale = zhCn
 const config = reactive({ max: 1 })
-const user = useUserStore()
-const chat = useChatStore()
+const userStore = useUserStore()
+const relationshipStore = useRelationshipStore()
 const ws = useWebSocketStore()
 
 onBeforeMount(() => {
-  user.initialize()
-  chat.initialize()
+  userStore.initialize()
+  relationshipStore.initialize()
   ws.initWebSocket()
 })
 </script>

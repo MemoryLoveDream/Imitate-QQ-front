@@ -1,20 +1,19 @@
 <script setup>
 import { ArrowDownBold, ArrowUpBold, CloseBold } from '@element-plus/icons-vue'
-import { onBeforeMount, ref, watch } from 'vue'
-import { useUserStore } from '../../store/user'
+import { ref, watch } from 'vue'
 
-const user = useUserStore()
-const props = defineProps({ placeholder: String, handleChange: Function })
+const props = defineProps({ placeholder: String, selectableItems: Object })
+const emit = defineEmits(['handle-change', 'delete-item'])
 const text = ref('')
 const show = ref(false)
 const isDown = ref(false)
-const inner_placeholder = ref(props.placeholder)
+const innerPlaceholder = ref(props.placeholder)
 
 function dropItems() {
   isDown.value = !isDown.value
   if (text.value === '') {
-    if (isDown.value) inner_placeholder.value = ''
-    else inner_placeholder.value = props.placeholder
+    if (isDown.value) innerPlaceholder.value = ''
+    else innerPlaceholder.value = props.placeholder
   }
 }
 
@@ -24,50 +23,32 @@ function selectItem(id) {
 }
 
 function deleteItem(index) {
-  user.logined_users.splice(index, 1)
-  if (user.logined_users.length === 0) {
+  props.selectableItems.splice(index, 1)
+  if (props.selectableItems.length === 0) {
     isDown.value = false
-    inner_placeholder.value = props.placeholder
+    innerPlaceholder.value = props.placeholder
   }
+  emit('delete-item', index)
 }
 
-function focusinEffect() {
+function focusin() {
   show.value = true
   isDown.value = false
-  if (text.value === '') inner_placeholder.value = ''
+  if (text.value === '') innerPlaceholder.value = ''
 }
 
-function focusoutEffect() {
+function focusout() {
   setTimeout(() => {
     show.value = false
-    if (text.value === '') inner_placeholder.value = props.placeholder
+    if (text.value === '') innerPlaceholder.value = props.placeholder
   }, 200)
 }
 
-watch(text, (value) => {
-  for (let i of user.logined_users) {
-    if (String(i.id) === value) {
-      props.handleChange(i.head_url)
-      break
-    } else props.handleChange('/src/assets/pic/head/head.png')
-  }
+watch(text, (id) => {
+  emit('handle-change', id)
 })
 
 defineExpose({ text })
-
-onBeforeMount(() => {
-  // user.logined_users.splice(0, 4)
-  // user.logined_users.push({
-  //   id: 1000000000,
-  //   nickname: '忆恋梦',
-  //   head_url: 'img:///E:/project/Vue/easychat-front/config/users/1000000000/head.jpg'
-  // })
-  // user.logined_users.push({
-  //   id: 1000000001,
-  //   nickname: '努力工作的小熊',
-  //   head_url: '/src/assets/png/working_bear.png'
-  // })
-})
 </script>
 
 <template>
@@ -75,9 +56,9 @@ onBeforeMount(() => {
     <input
       v-model="text"
       class="input"
-      :placeholder="inner_placeholder"
-      @focusin="focusinEffect"
-      @focusout="focusoutEffect"
+      :placeholder="innerPlaceholder"
+      @focusin="focusin"
+      @focusout="focusout"
     />
     <el-icon v-if="show" class="clear" color="#888" @click="text = ''">
       <CloseBold />
@@ -88,12 +69,12 @@ onBeforeMount(() => {
     </el-icon>
     <div v-if="isDown" class="drop-items">
       <div
-        v-for="(item, index) in user.logined_users"
+        v-for="(item, index) in props.selectableItems"
         :key="index"
         class="item"
         @click="selectItem(item.id)"
       >
-        <el-avatar class="item_avatar" :size="15" :src="item.head_url" />
+        <el-avatar class="item_avatar" :size="15" :src="item.headUrl" />
         <div class="item_text">{{ item.id }}</div>
         <el-icon class="item_clear" @click.stop="deleteItem(index)">
           <CloseBold />
@@ -137,7 +118,7 @@ onBeforeMount(() => {
 .drop-items {
   position: relative;
   width: 100%;
-  top: 50px;
+  top: 45px;
   max-height: 120px;
 }
 
@@ -145,7 +126,7 @@ onBeforeMount(() => {
   position: relative;
   width: 100%;
   height: 40px;
-  margin-bottom: 5px;
+  margin-bottom: 3px;
   background-color: white;
   border-radius: 5px;
   box-shadow: 0 0 10px 2px #999;

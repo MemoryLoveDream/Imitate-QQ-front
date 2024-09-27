@@ -5,7 +5,7 @@ import ClickInput from '../input/ClickInput.vue'
 import { useRelationshipStore } from '../../store/relationship'
 import CircularChart from '../data/CircularChart.vue'
 
-const relationship = useRelationshipStore()
+const relationshipStore = useRelationshipStore()
 const urls = ref({
   leader_url: 'img:///E:/project/Vue/easychat-front/config/users/1000000000/head.jpg',
   member_urls: [
@@ -59,11 +59,11 @@ const dataset = ref([
 ])
 
 function afterFocusout1(text) {
-  relationship.group_information.note = text
+  relationshipStore.groupInformation.note = text
 }
 
 function afterFocusout2(text) {
-  relationship.group_information.nickname = text
+  relationshipStore.groupInformation.nickname = text
 }
 </script>
 
@@ -79,7 +79,7 @@ function afterFocusout2(text) {
       <IconText class="note" url="/src/assets/pic/info/note.svg" text="备注" />
       <ClickInput
         class="note-input"
-        :text="relationship.group_information.note"
+        :text="relationshipStore.groupInformation.note"
         placeholder="设置群备注"
         @after-focusout="afterFocusout1"
       />
@@ -93,7 +93,7 @@ function afterFocusout2(text) {
       />
       <ClickInput
         class="nickname-input"
-        :text="relationship.group_information.nickname"
+        :text="relationshipStore.groupInformation.nickname"
         placeholder="编辑群昵称"
         @after-focusout="afterFocusout2"
       />

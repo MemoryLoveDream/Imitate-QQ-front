@@ -1,12 +1,17 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { reactive, ref } from 'vue'
+import { useConfigStore } from './config'
+import { useUserStore } from './user'
 
 export const useRelationshipStore = defineStore(
   'relationship',
   () => {
-    const type = ref('single')
+    const configStore = useConfigStore()
+    const userStore = useUserStore()
 
-    const grouping_types = ref([
+    const messageList = ref([])
+    const relationshipType = ref('single')
+    const singleGroupingTypes = ref([
       {
         value: '我',
         label: '我'
@@ -16,8 +21,7 @@ export const useRelationshipStore = defineStore(
         label: '元老'
       }
     ])
-
-    const single_grouping = ref([
+    const singleGrouping = ref([
       {
         name: '我',
         number: '1/1',
@@ -26,7 +30,7 @@ export const useRelationshipStore = defineStore(
             type: 'single',
             id: 1000000000,
             nickname: '忆恋梦',
-            head_url: 'img:///E:/project/Vue/easychat-front/config/users/1000000000/head.jpg',
+            headUrl: 'img:///E:/project/Vue/easychat-front/config/users/1000000000/head.jpg',
             signature: '欢迎使用逛逛！'
           }
         ]
@@ -39,42 +43,41 @@ export const useRelationshipStore = defineStore(
             type: 'single',
             id: 1000000001,
             nickname: '努力工作的小熊',
-            head_url: '/src/assets/pic/head/working_bear.png',
+            headUrl: '/src/assets/pic/head/working_bear.png',
             signature: '努力拼搏，迎接美好的未来！'
           },
           {
             type: 'single',
             id: 1000000002,
             nickname: '萌萌的小雪人',
-            head_url: '/src/assets/pic/head/girl_snowman.png',
+            headUrl: '/src/assets/pic/head/girl_snowman.png',
             signature: '喜欢下雪的冬天，嘻嘻！'
           },
           {
             type: 'single',
             id: 1000000003,
             nickname: 'yearbook',
-            head_url: '/src/assets/pic/head/yearbook.png',
+            headUrl: '/src/assets/pic/head/yearbook.png',
             signature: 'yearbook！'
           },
           {
             type: 'single',
             id: 1000000004,
             nickname: '微风滚青草',
-            head_url: '/src/assets/pic/head/wind_grass.png',
+            headUrl: '/src/assets/pic/head/wind_grass.png',
             signature: '享受风轻轻拂过身体的自由，享受躺在草地上的自在！'
           },
           {
             type: 'single',
             id: 1000000005,
             nickname: '逃离孤独',
-            head_url: '/src/assets/pic/head/stones.png',
+            headUrl: '/src/assets/pic/head/stones.png',
             signature: '习惯了一个人的孤独，是否还愿意再入喧嚣！'
           }
         ]
       }
     ])
-
-    const group_grouping = ref([
+    const groupGrouping = ref([
       {
         name: '置顶群',
         number: '0/0',
@@ -88,7 +91,7 @@ export const useRelationshipStore = defineStore(
             type: 'group',
             id: 1000000001,
             name: '元老会',
-            head_url: '/src/assets/pic/head/icon.png'
+            headUrl: '/src/assets/pic/head/icon.png'
           }
         ]
       },
@@ -103,36 +106,92 @@ export const useRelationshipStore = defineStore(
         members: []
       }
     ])
-
-    const single_information = ref({
+    const singleInformation = ref({
       id: 1000000001,
       nickname: '努力工作的小熊',
-      head_url: '/src/assets/pic/head/working_bear.png',
+      headUrl: '/src/assets/pic/head/working_bear.png',
+      email: '2274399174@qq.com',
       sex: 1,
-      status: 1,
       note: '卷王熊',
       grouping: '元老',
-      signature: '努力拼搏，迎接美好的未来！'
+      signature: '努力拼搏，迎接美好的未来！',
+      country: '中国',
+      location: '江苏·南京',
+      status: 1
     })
-
-    const group_information = ref({
+    const groupInformation = ref({
       id: 1000000001,
       name: '元老会',
-      head_url: '/src/assets/pic/head/icon.png',
+      headUrl: '/src/assets/pic/head/icon.png',
       note: '',
       nickname: '开国大元帅',
       introduction: '',
       announcement: ''
     })
+    const singleChatHistory = reactive(new Map())
+    const groupChatHistory = reactive(new Map())
+
+    const url = ref()
+
+    function toJsonUrl(filename) {
+      return url.value + filename + '.json'
+    }
+
+    function readJson(filename) {
+      return JSON.parse(window.api.read(toJsonUrl(filename)))
+    }
+
+    function writeJson(filename, data) {
+      window.api.write(toJsonUrl(filename), JSON.stringify(data.value))
+    }
+
+    function loadChatHistory() {
+      for (let message of messageList.value) {
+        if (message.type === 'single') singleChatHistory.set(message.id, readJson('s' + message.id))
+        else if (message.type === 'group')
+          singleChatHistory.set(message.id, readJson('g' + message.id))
+      }
+    }
+
+    function getChatHistory() {
+      if (relationshipType.value === 'single')
+        return singleChatHistory.get(singleInformation.value.id)
+      else if (relationshipType.value === 'group')
+        return groupChatHistory.get(groupInformation.value.id)
+    }
+
+    function addChatHistory(chat) {
+      if (relationshipType.value === 'single')
+        singleChatHistory.get(singleInformation.value.id).push(chat)
+      else if (relationshipType.value === 'group')
+        return groupChatHistory.get(groupInformation.value.id).push(chat)
+    }
+
+    function initialize() {
+      url.value = configStore.chatHistoryLocation + userStore.currentUser.id + '/'
+      messageList.value = readJson('message_list')
+      loadChatHistory()
+    }
+
+    function save() {
+      writeJson('message_list', messageList)
+    }
 
     return {
-      type,
-      grouping_types,
-      single_grouping,
-      group_grouping,
-      single_information,
-      group_information
+      messageList,
+      relationshipType,
+      singleGroupingTypes,
+      singleGrouping,
+      groupGrouping,
+      singleInformation,
+      groupInformation,
+      singleChatHistory,
+      groupChatHistory,
+      initialize,
+      save,
+      addChatHistory,
+      getChatHistory
     }
   },
-  { persist: true }
+  // { persist: true }
 )

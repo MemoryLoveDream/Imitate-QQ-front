@@ -4,20 +4,20 @@ import ChatFunctionBar from '../../components/chat/ChatFunctionBar.vue'
 import ChatDetails from '../../components/chat/ChatDetails.vue'
 import ChatInput from '../../components/chat/ChatInput.vue'
 import { onMounted, ref } from 'vue'
-import { useStatusStore } from '../../store/components'
+import { useComponentsStore } from '../../store/components'
 
-const status = useStatusStore()
-const chat_details = ref()
+const componentsStore = useComponentsStore()
+const chatDetails = ref()
 
 onMounted(() => {
-  status.chat_details = chat_details.value
+  componentsStore.chatDetails = chatDetails.value
 })
 </script>
 
 <template>
   <div class="message-block">
     <ChatFunctionBar />
-    <ChatDetails ref="chat_details" />
+    <ChatDetails ref="chatDetails" />
     <ChatInput />
     <WindowButtons />
   </div>

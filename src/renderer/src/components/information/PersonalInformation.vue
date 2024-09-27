@@ -7,8 +7,8 @@ import { useRelationshipStore } from '../../store/relationship'
 import { useComponentsStore } from '../../store/components'
 import router from '../../router'
 
-const relationship = useRelationshipStore()
-const components = useComponentsStore()
+const relationshipStore = useRelationshipStore()
+const componentsStore = useComponentsStore()
 const urls = ref({
   name: 'PersonalInformation',
   inactive_url: '/src/assets/pic/info/thumbs_up.svg',
@@ -17,11 +17,11 @@ const urls = ref({
 })
 
 function afterFocusout(text) {
-  relationship.single_information.nickname = text
+  relationshipStore.singleInformation.nickname = text
 }
 
 function click() {
-  components.changeTab(0)
+  componentsStore.changeTab(0)
   router.replace('/main/two/message')
 }
 </script>
@@ -29,13 +29,13 @@ function click() {
 <template>
   <div class="personal-information">
     <div class="header">
-      <el-avatar class="head" :src="relationship.single_information.head_url" :size="100" />
-      <div class="nickname">{{ relationship.single_information.nickname }}</div>
-      <div class="id">id {{ relationship.single_information.id }}</div>
+      <el-avatar class="head" :src="relationshipStore.singleInformation.headUrl" :size="100" />
+      <div class="nickname">{{ relationshipStore.singleInformation.nickname }}</div>
+      <div class="id">id {{ relationshipStore.singleInformation.id }}</div>
       <IconText
         class="status"
         url="/src/assets/pic/info/online.svg"
-        :text="relationship.single_information.status === 1 ? '在线' : '离线'"
+        :text="relationshipStore.singleInformation.status === 1 ? '在线' : '离线'"
         :size="[35, 80, -5]"
       />
       <ActivatableIcon class="thumbs-up" :urls="urls" />
@@ -45,7 +45,7 @@ function click() {
       <IconText class="note" url="/src/assets/pic/info/note.svg" text="备注" />
       <ClickInput
         class="note-input"
-        :text="relationship.single_information.note"
+        :text="relationshipStore.singleInformation.note"
         @after-focusout="afterFocusout"
       />
     </div>
@@ -56,9 +56,9 @@ function click() {
         text="好友分组"
         :size="[20, 120, 10]"
       />
-      <el-select v-model="relationship.single_information.grouping" class="grouping-select">
+      <el-select v-model="relationshipStore.singleInformation.grouping" class="grouping-select">
         <el-option
-          v-for="item in relationship.grouping_types"
+          v-for="item in relationshipStore.singleGroupingTypes"
           :key="item.value"
           :label="item.label"
           :value="item.value"
@@ -72,7 +72,7 @@ function click() {
         text="签名"
         :size="[20, 120, 10]"
       />
-      <div class="signature-text">{{ relationship.single_information.signature }}</div>
+      <div class="signature-text">{{ relationshipStore.singleInformation.signature }}</div>
     </div>
     <div class="divider2"></div>
     <div class="line4">

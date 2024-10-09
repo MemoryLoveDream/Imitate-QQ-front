@@ -28,57 +28,64 @@ function click() {
 
 <template>
   <div class="personal-information">
-    <div class="header">
-      <el-avatar class="head" :src="relationshipStore.singleInformation.headUrl" :size="100" />
-      <div class="nickname">{{ relationshipStore.singleInformation.nickname }}</div>
-      <div class="id">id {{ relationshipStore.singleInformation.id }}</div>
-      <IconText
-        class="status"
-        url="/src/assets/pic/info/online.svg"
-        :text="relationshipStore.singleInformation.status === 1 ? '在线' : '离线'"
-        :size="[35, 80, -5]"
-      />
-      <ActivatableIcon class="thumbs-up" :urls="urls" />
-    </div>
-    <div class="divider1"></div>
-    <div class="line1">
-      <IconText class="note" url="/src/assets/pic/info/note.svg" text="备注" />
-      <ClickInput
-        class="note-input"
-        :text="relationshipStore.singleInformation.note"
-        @after-focusout="afterFocusout"
-      />
-    </div>
-    <div class="line2">
-      <IconText
-        class="grouping"
-        url="/src/assets/pic/info/grouping.svg"
-        text="好友分组"
-        :size="[20, 120, 10]"
-      />
-      <el-select v-model="relationshipStore.singleInformation.grouping" class="grouping-select">
-        <el-option
-          v-for="item in relationshipStore.singleGroupingTypes"
-          :key="item.value"
-          :label="item.label"
-          :value="item.value"
+    <div class="card">
+      <div class="header">
+        <el-avatar class="head" :src="relationshipStore.singleInformation.headUrl" :size="100" />
+        <div class="nickname">{{ relationshipStore.singleInformation.nickname }}</div>
+        <div class="id">id {{ relationshipStore.singleInformation.id }}</div>
+        <IconText
+          class="status"
+          :url="
+            relationshipStore.singleInformation.status === 1
+              ? '/src/assets/pic/info/online.svg'
+              : '/src/assets/pic/info/offline.svg'
+          "
+          :text="relationshipStore.singleInformation.status === 1 ? '在线' : '离线'"
+          :size="[35, 80, -5]"
         />
-      </el-select>
-    </div>
-    <div class="line3">
-      <IconText
-        class="signature"
-        url="/src/assets/pic/info/signature.svg"
-        text="签名"
-        :size="[20, 120, 10]"
-      />
-      <div class="signature-text">{{ relationshipStore.singleInformation.signature }}</div>
-    </div>
-    <div class="divider2"></div>
-    <div class="line4">
-      <el-button class="btn">分享</el-button>
-      <el-button class="btn">音视频通话</el-button>
-      <el-button class="btn" color="#0099ff" @click="click">发消息</el-button>
+        <ActivatableIcon class="thumbs-up" :urls="urls" />
+      </div>
+      <div class="divider1"></div>
+      <div class="line1">
+        <IconText class="note" url="/src/assets/pic/info/note.svg" text="备注" />
+        <ClickInput
+          class="note-input"
+          placeholder="设置好友备注"
+          :text="relationshipStore.singleInformation.note"
+          @after-focusout="afterFocusout"
+        />
+      </div>
+      <div class="line2">
+        <IconText
+          class="grouping"
+          url="/src/assets/pic/info/grouping.svg"
+          text="好友分组"
+          :size="[20, 120, 10]"
+        />
+        <el-select v-model="relationshipStore.singleInformation.grouping" class="grouping-select">
+          <el-option
+            v-for="item in relationshipStore.singleGroupingTypes"
+            :key="item"
+            :label="item"
+            :value="item"
+          />
+        </el-select>
+      </div>
+      <div class="line3">
+        <IconText
+          class="signature"
+          url="/src/assets/pic/info/signature.svg"
+          text="签名"
+          :size="[20, 120, 10]"
+        />
+        <div class="signature-text">{{ relationshipStore.singleInformation.signature }}</div>
+      </div>
+      <div class="divider2"></div>
+      <div class="line4">
+        <el-button class="btn">分享</el-button>
+        <el-button class="btn">音视频通话</el-button>
+        <el-button class="btn" color="#0099ff" @click="click">发消息</el-button>
+      </div>
     </div>
   </div>
 </template>
@@ -86,9 +93,20 @@ function click() {
 <style scoped lang="less">
 .personal-information {
   position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.card {
+  position: absolute;
   height: 500px;
   width: 500px;
   user-select: none;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .header {

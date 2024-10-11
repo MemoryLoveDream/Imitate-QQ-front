@@ -1,5 +1,6 @@
 <script setup>
 import { ref, watch } from 'vue'
+import { dateFormat } from '../../utils/date'
 
 const props = defineProps({ n: Number, message: Object })
 const emit = defineEmits(['after-select'])
@@ -9,7 +10,7 @@ const nickname_class = ref('nickname')
 const date_class = ref('date')
 const latest_message_class = ref('latest_message')
 const status = ref('inactive')
-const unread = ref(1)
+const unread = ref(props.message.unread)
 
 watch(status, (value) => {
   if (value === 'active') {
@@ -41,7 +42,7 @@ function mouseOut() {
 
 function click() {
   status.value = 'active'
-  emit('after-select', props.n, props.message.id)
+  emit('after-select', props.n, props.message.messageType, props.message.senderId)
 }
 
 function setInactive() {
@@ -53,19 +54,14 @@ defineExpose({ setInactive })
 
 <template>
   <el-badge class="message" :value="unread" :max="99" :show-zero="false" :offset="[-20, 50]">
-    <div
-      :class="message_class"
-      @mouseover="mouseOver"
-      @mouseout="mouseOut"
-      @click="click"
-    >
+    <div :class="message_class" @mouseover="mouseOver" @mouseout="mouseOut" @click="click">
       <el-avatar class="head" :size="40" :src="props.message.headUrl" />
       <div id="nickname_id" :class="nickname_class">
         {{ props.message.nickname }}
       </div>
-      <div id="date_id" :class="date_class">{{ props.message.date }}</div>
+      <div id="date_id" :class="date_class">{{ dateFormat(props.message.sendTime) }}</div>
       <div id="latest_message_id" :class="latest_message_class">
-        {{ props.message.latestMessage }}
+        {{ props.message.content }}
       </div>
     </div>
   </el-badge>

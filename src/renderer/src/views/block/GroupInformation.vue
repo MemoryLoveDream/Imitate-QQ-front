@@ -1,21 +1,19 @@
 <script setup>
 import { ref } from 'vue'
-import IconText from '../base/IconText.vue'
-import ClickInput from '../input/ClickInput.vue'
+import IconText from '../../components/base/IconText.vue'
+import ClickInput from '../../components/input/ClickInput.vue'
+import CircularChart from '../../components/data/CircularChart.vue'
+import WindowButtons from '../../components/base/WindowButtons.vue'
+import { useComponentsStore } from '../../store/components'
+import axios from 'axios'
+import { ElMessage } from 'element-plus'
+import { useUserStore } from '../../store/user'
 import { useRelationshipStore } from '../../store/relationship'
-import CircularChart from '../data/CircularChart.vue'
+import router from "../../router";
 
+const userStore = useUserStore()
 const relationshipStore = useRelationshipStore()
-const urls = ref({
-  leader_url: 'img:///E:/project/Vue/easychat-front/assets/users/1000000000/head.jpg',
-  member_urls: [
-    '/src/assets/pic/head/working_bear.png',
-    '/src/assets/pic/head/girl_snowman.png',
-    '/src/assets/pic/head/wind_grass.png',
-    '/src/assets/pic/head/yearbook.png',
-    '/src/assets/pic/head/stones.png'
-  ]
-})
+const componentsStore = useComponentsStore()
 const dataset = ref([
   {
     code: 'chart1',
@@ -59,28 +57,53 @@ const dataset = ref([
 ])
 
 function afterFocusout1(text) {
-  relationshipStore.groupInformation.note = text
+  relationshipStore.info.note = text
+  axios
+    .post('/group_member/update_note', {
+      i: userStore.currentUser.id,
+      you: relationshipStore.info.id,
+      newValue: text
+    })
+    .then((response) => {
+      if (response.data.data === false) ElMessage({ type: 'error', message: '网络连接出错！' })
+    })
 }
 
 function afterFocusout2(text) {
-  relationshipStore.groupInformation.nickname = text
+  relationshipStore.info.nickname = text
+  axios
+    .post('/group_member/update_nickname', {
+      i: userStore.currentUser.id,
+      you: relationshipStore.info.id,
+      newValue: text
+    })
+    .then((response) => {
+      if (response.data.data === false) ElMessage({ type: 'error', message: '网络连接出错！' })
+    })
+}
+
+function click() {
+  componentsStore.changeTab(0)
+  router.replace('/main/two/message')
+  relationshipStore.addMessage(...relationshipStore.infoUid)
+  relationshipStore.changeChatterUid(...relationshipStore.infoUid)
 }
 </script>
 
 <template>
   <div class="group-information">
-    <div class="card">
+    <div :key="componentsStore.groupInformationKey" class="card">
       <div class="header">
-        <el-avatar class="head" :src="relationshipStore.groupInformation.headUrl" :size="100" />
-        <div class="name">{{ relationshipStore.groupInformation.name }}</div>
-        <div class="id">id {{ relationshipStore.groupInformation.id }}</div>
+        <el-avatar class="head" :src="relationshipStore.info.headUrl" :size="100" />
+        <div class="name">{{ relationshipStore.info.name }}</div>
+        <div class="id">id {{ relationshipStore.info.id }}</div>
       </div>
       <div class="divider"></div>
       <div class="line1">
         <IconText class="note" url="/src/assets/pic/info/note.svg" text="备注" />
         <ClickInput
           class="note-input"
-          :text="relationshipStore.groupInformation.note"
+          :text="relationshipStore.info.note"
           placeholder="设置群备注"
           @after-focusout="afterFocusout1"
         />
@@ -94,7 +117,7 @@ function afterFocusout2(text) {
         />
         <ClickInput
           class="nickname-input"
-          :text="relationshipStore.groupInformation.nickname"
+          :text="relationshipStore.info.nickname"
           placeholder="编辑群昵称"
           @after-focusout="afterFocusout2"
         />
@@ -121,15 +144,15 @@ function afterFocusout2(text) {
         <IconText
           class="members"
           url="/src/assets/pic/info/grouping.svg"
-          text="群成员(6人)"
+          :text="`群成员(${relationshipStore.info.number}人)`"
           :size="[20, 120, 10]"
         />
         <div class="members-head">
-          <el-avatar class="leader-url" :src="urls.leader_url" :size="30" />
+          <el-avatar class="leader-url" :src="relationshipStore.info.leaderHeadUrl" :size="30" />
           <div class="fence"></div>
           <div class="member-urls">
             <el-avatar
-              v-for="(member_url, index) in urls.member_urls"
+              v-for="(member_url, index) in relationshipStore.info.memberHeadUrls"
               :key="index"
               :src="member_url"
               :size="30"
@@ -159,9 +182,10 @@ function afterFocusout2(text) {
       </div>
       <div class="line7">
         <el-button class="btn">分享</el-button>
-        <el-button class="btn" color="#0099ff">发消息</el-button>
+        <el-button class="btn" color="#0099ff" @click="click">发消息</el-button>
       </div>
     </div>
+    <WindowButtons />
   </div>
 </template>
 

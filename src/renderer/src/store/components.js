@@ -1,36 +1,46 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { useRelationshipStore } from './relationship'
+import { MessageType } from './constants'
 
-export const useComponentsStore = defineStore(
-  'components',
-  () => {
-    const tabs = ref()
-    const chatDetails = ref()
+export const useComponentsStore = defineStore('components', () => {
+  const relationshipStore = useRelationshipStore()
 
-    function changeTab(index) {
-      tabs.value.changeTab(index)
-    }
+  const tabs = ref()
+  const chatDetails = ref()
+  const personalInformationKey = ref(0)
+  const groupInformationKey = ref(0)
 
-    function addChat(chat) {
-      chatDetails.value.addChat(chat)
-    }
+  function changeTab(index) {
+    tabs.value.changeTab(index)
+  }
 
-    function sendChat(chat) {
-      chatDetails.value.sendChat(chat)
-    }
+  function addChat(type, id, chat) {
+    chatDetails.value.addChat(type, id, chat)
+  }
 
-    function refreshChatHistory() {
-      chatDetails.value.refresh()
-    }
+  function sendChat(chat) {
+    chatDetails.value.sendChat(chat)
+  }
 
-    return {
-      tabs,
-      chatDetails,
-      changeTab,
-      addChat,
-      sendChat,
-      refreshChatHistory
-    }
-  },
-  { persist: true }
-)
+  function refreshChatHistory() {
+    chatDetails.value.refresh()
+  }
+
+  function refreshInformationBlock() {
+    if (relationshipStore.infoUid[0] === MessageType.SINGLE) personalInformationKey.value++
+    else if (relationshipStore.infoUid[0] === MessageType.GROUP) groupInformationKey.value++
+  }
+
+  return {
+    tabs,
+    chatDetails,
+    personalInformationKey,
+    groupInformationKey,
+    changeTab,
+    addChat,
+    sendChat,
+    refreshChatHistory,
+    refreshInformationBlock
+  }
+})

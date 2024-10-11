@@ -52,7 +52,7 @@ defineExpose({ setInactive })
 <template>
   <div :class="message_class" @mouseover="mouseOver" @mouseout="mouseOut" @click="click">
     <el-avatar class="head" :size="40" :src="props.info.headUrl" />
-    <div v-if="props.info.type === 'single'">
+    <div v-if="props.info.type === 1">
       <div id="nickname_id" :class="nickname_class">
         {{ props.info.nickname }}
       </div>
@@ -60,7 +60,7 @@ defineExpose({ setInactive })
         {{ props.info.signature }}
       </div>
     </div>
-    <div v-if="props.info.type === 'group'" :class="name_class">{{ props.info.name }}</div>
+    <div v-if="props.info.type === 2" :class="name_class">{{ props.info.name }}</div>
   </div>
 </template>
 

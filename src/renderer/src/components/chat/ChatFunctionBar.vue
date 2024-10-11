@@ -25,7 +25,9 @@ const icons = reactive([
 
 <template>
   <div class="chat-function-bar">
-    <div class="nickname">{{ relationshipStore.singleInformation.nickname }}</div>
+    <div class="nickname">
+      {{ relationshipStore.chatter.name ?? relationshipStore.chatter.nickname }}
+    </div>
     <div class="icons">
       <HoverableIcon v-for="icon in icons" :key="icon.name" class="icon" :urls="icon" />
     </div>

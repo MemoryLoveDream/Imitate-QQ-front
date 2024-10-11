@@ -14,15 +14,14 @@ const password = ref()
 
 function register() {
   axios
-    .post('/user/register', { id: input.value.text, password: password.value.text })
+    .post('/user/register', { nickname: input.value.text, password: password.value.text })
     .then((response) => {
       if (response.data.code === 200) {
         router.replace('/main')
         window.api.change_size()
-        axios.get('/user/info?id=' + input.value.text).then((response) => {
-          userStore.currentUser = response.data.data
-          userStore.updateLatestLoginedUser(response.data.data, password.value.text)
-        })
+        userStore.currentUser.id = response.data.data
+        userStore.currentUser.nickname = input.value.text
+        userStore.updateLatestLoginedUser(response.data.data, password.value.text)
       }
     })
 }
@@ -58,7 +57,7 @@ function change_head() {
   <div class="background">
     <CloseButton />
     <el-avatar class="head" :size="80" :src="headUrl" @click="change_head" />
-    <FunctionalInput class="input" placeholder="输入账号">
+    <FunctionalInput class="input" placeholder="输入昵称">
       <CloseBold />
     </FunctionalInput>
     <FunctionalInput class="password" placeholder="输入密码" type="password">

@@ -1,6 +1,14 @@
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import router from '../../router'
+
+const n = ref(0)
+
+function refresh() {
+  n.value++
+}
+
+defineExpose({ refresh })
 
 onMounted(() => {
   router.replace('/main/two/message_null')
@@ -10,7 +18,7 @@ onMounted(() => {
 <template class="container">
   <div class="first"><router-view name="first" /></div>
   <div class="divider"></div>
-  <div class="second"><router-view name="second" /></div>
+  <div class="second"><router-view :key="n" name="second" /></div>
 </template>
 
 <style scoped lang="less">

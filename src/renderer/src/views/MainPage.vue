@@ -1,7 +1,17 @@
 <script setup>
 import ManagementBar from './ManagementBar.vue'
-import { onMounted } from 'vue'
+import { onBeforeMount, onMounted } from 'vue'
 import router from '../router'
+import { useWebSocketStore } from '../store/webSocket'
+import { useRelationshipStore } from '../store/relationship'
+
+const ws = useWebSocketStore()
+const relationshipStore = useRelationshipStore()
+
+onBeforeMount(() => {
+  ws.initWebSocket()
+  relationshipStore.initialize()
+})
 
 onMounted(() => {
   router.replace('/main/two')

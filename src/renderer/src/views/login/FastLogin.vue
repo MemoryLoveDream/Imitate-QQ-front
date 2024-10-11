@@ -5,14 +5,15 @@ import router from '../../router'
 import { useUserStore } from '../../store/user'
 
 const userStore = useUserStore()
-const { id, nickname, headUrl, password } = userStore.latestLoginedUser
+const { id, password } = userStore.latestLoginedUser
+const { nickname, headUrl } = userStore.loginedUsers.get(id)
 
 function fastLogin() {
   axios.post('/user/login', { id: id, password: password }).then((response) => {
     if (response.data.code === 200) {
       router.replace('/main')
       window.api.change_size()
-      axios.get('/user/info?id=' + id).then((response) => {
+      axios.get('/user/user_info/' + id).then((response) => {
         userStore.currentUser = response.data.data
       })
     }

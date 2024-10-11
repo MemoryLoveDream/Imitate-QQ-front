@@ -13,7 +13,6 @@ const userStore = useUserStore()
 const headUrl = ref('/src/assets/pic/head/head.png')
 const select = ref()
 const password = ref()
-const map = ref(new Map())
 
 function login() {
   axios
@@ -22,9 +21,9 @@ function login() {
       if (response.data.code === 200) {
         router.replace('/main')
         window.api.change_size()
-        axios.get('/user/info?id=' + select.value.text).then((response) => {
+        axios.get('/user/user_info/' + select.value.text).then((response) => {
           userStore.currentUser = response.data.data
-          userStore.updateLatestLoginedUser(response.data.data, password.value.text)
+          userStore.updateLatestLoginedUser(response.data.data.id, password.value.text)
         })
       }
       ElMessage({ type: 'warning', message: '账号或密码错误' })
@@ -36,13 +35,13 @@ function change(url) {
 }
 
 function handleChange(id) {
-  map.value = userStore.loginedUsersMap()
-  if (map.value.has(Number(id))) headUrl.value = map.value.get(Number(id)).headUrl
+  if (userStore.loginedUsers.has(Number(id)))
+    headUrl.value = userStore.loginedUsers.get(Number(id)).headUrl
   else headUrl.value = '/src/assets/pic/head/head.png'
 }
 
-function deleteItem(index) {
-  userStore.loginedUsers.splice(index, 1)
+function deleteItem(id) {
+  userStore.loginedUsers.delete(id)
 }
 </script>
 
@@ -54,7 +53,7 @@ function deleteItem(index) {
       ref="select"
       class="select"
       placeholder="输入账号"
-      :selectable-items="userStore.loginedUsers"
+      :selectable-items="[...userStore.loginedUsers.values()]"
       @handle-change="handleChange"
       @delete-item="deleteItem"
     />

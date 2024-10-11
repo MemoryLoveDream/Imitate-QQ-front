@@ -5,7 +5,6 @@ import Message from './Message.vue'
 import router from '../../router'
 import { useComponentsStore } from '../../store/components'
 import { useRelationshipStore } from '../../store/relationship'
-import axios from 'axios'
 
 const relationshipStore = useRelationshipStore()
 const components = useComponentsStore()
@@ -16,17 +15,18 @@ const selected = ref(-1)
 
 watch(selected, () => router.replace('/main/two/message'), { once: true })
 
-function afterSelect(n, id) {
-  if (selected.value !== n) {
-    axios.get('/user/info?id=' + id).then((response) => {
-      relationshipStore.singleInformation = response.data.data
+function afterSelect(n, type, id) {
+  relationshipStore.addInfo(type, id, () => {
+    relationshipStore.changeChatterUid(type, id)
+    if (selected.value !== n) {
       if (selected.value !== -1) {
         messagesRef.value[selected.value].setInactive()
+        // router.replace('/main/two/message')
         components.refreshChatHistory()
       }
       selected.value = n
-    })
-  }
+    }
+  })
 }
 </script>
 

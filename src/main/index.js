@@ -4,7 +4,6 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import fs from 'fs'
 import { dialog } from 'electron'
-import { options } from "axios";
 
 const path = require('path')
 
@@ -132,17 +131,15 @@ ipcMain.handle('create_child', (event, name, width, height, router) => {
   createChildWindow(name, width, height, router)
 })
 
-ipcMain.handle('write', async (event, path, data) => {
-  if (fs.existsSync(path)) {
-    fs.writeFile(path, data, (err) => {
-      if (err) throw err
-    })
-  }
+ipcMain.handle('write', (event, path, data) => {
+  fs.writeFile(path, data, (err) => {
+    if (err) throw err
+  })
 })
 
 ipcMain.on('read', (event, path) => {
   if (fs.existsSync(path)) event.returnValue = fs.readFileSync(path, 'utf8')
-  else event.returnValue = ''
+  else event.returnValue = '[]'
 })
 
 ipcMain.on('select_file', (event, options) => {

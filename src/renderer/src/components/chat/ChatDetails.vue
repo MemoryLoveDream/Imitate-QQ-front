@@ -6,6 +6,7 @@ import { useWebSocketStore } from '../../store/webSocket'
 
 const relationshipStore = useRelationshipStore()
 const ws = useWebSocketStore()
+
 const scrollbar = ref()
 const inner = ref()
 const n = ref(0)
@@ -22,14 +23,16 @@ function refresh() {
   scrollToBottom()
 }
 
-function addChat(chat) {
-  chat.addChatHistory(chat)
-  scrollToBottom()
+function addChat(type, id, chat) {
+  relationshipStore.addChatHistory(type, id, chat)
+  if (type === relationshipStore.chatterUid[0] && id === relationshipStore.chatterUid[1])
+    scrollToBottom()
 }
 
 function sendChat(chat) {
-  addChat(chat)
-  chat.receiver_id = relationshipStore.singleInformation.id
+  addChat(...relationshipStore.chatterUid, chat)
+  chat.messageType = relationshipStore.chatterUid[0]
+  chat.receiverId = relationshipStore.chatterUid[1]
   ws.sendMessage(chat)
 }
 
@@ -45,7 +48,7 @@ onMounted(() => {
     <el-scrollbar ref="scrollbar">
       <div ref="inner" :key="n">
         <Chat
-          v-for="(chat1, index) in relationshipStore.getChatHistory()"
+          v-for="(chat1, index) in relationshipStore.history"
           :key="index"
           class="row"
           :chat="chat1"

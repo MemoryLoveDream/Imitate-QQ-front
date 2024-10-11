@@ -1,197 +1,155 @@
 import { defineStore } from 'pinia'
 import { reactive, ref } from 'vue'
-import { useConfigStore } from './config'
+import { useAssetsStore } from './assets'
 import { useUserStore } from './user'
+import axios from 'axios'
+import { MessageType } from './constants'
 
 export const useRelationshipStore = defineStore(
   'relationship',
   () => {
-    const configStore = useConfigStore()
+    const assetsStore = useAssetsStore()
     const userStore = useUserStore()
 
     const messageList = ref([])
-    const relationshipType = ref('single')
-    const singleGroupingTypes = ref([
-      {
-        value: '我',
-        label: '我'
-      },
-      {
-        value: '元老',
-        label: '元老'
-      }
-    ])
-    const singleGrouping = ref([
-      {
-        name: '我',
-        number: '1/1',
-        members: [
-          {
-            type: 'single',
-            id: 1000000000,
-            nickname: '忆恋梦',
-            headUrl: 'img:///E:/project/Vue/easychat-front/config/users/1000000000/head.jpg',
-            signature: '欢迎使用逛逛！'
-          }
-        ]
-      },
-      {
-        name: '元老',
-        number: '5/5',
-        members: [
-          {
-            type: 'single',
-            id: 1000000001,
-            nickname: '努力工作的小熊',
-            headUrl: '/src/assets/pic/head/working_bear.png',
-            signature: '努力拼搏，迎接美好的未来！'
-          },
-          {
-            type: 'single',
-            id: 1000000002,
-            nickname: '萌萌的小雪人',
-            headUrl: '/src/assets/pic/head/girl_snowman.png',
-            signature: '喜欢下雪的冬天，嘻嘻！'
-          },
-          {
-            type: 'single',
-            id: 1000000003,
-            nickname: 'yearbook',
-            headUrl: '/src/assets/pic/head/yearbook.png',
-            signature: 'yearbook！'
-          },
-          {
-            type: 'single',
-            id: 1000000004,
-            nickname: '微风滚青草',
-            headUrl: '/src/assets/pic/head/wind_grass.png',
-            signature: '享受风轻轻拂过身体的自由，享受躺在草地上的自在！'
-          },
-          {
-            type: 'single',
-            id: 1000000005,
-            nickname: '逃离孤独',
-            headUrl: '/src/assets/pic/head/stones.png',
-            signature: '习惯了一个人的孤独，是否还愿意再入喧嚣！'
-          }
-        ]
-      }
-    ])
-    const groupGrouping = ref([
-      {
-        name: '置顶群',
-        number: '0/0',
-        members: []
-      },
-      {
-        name: '我创建的群',
-        number: '1/1',
-        members: [
-          {
-            type: 'group',
-            id: 1000000001,
-            name: '元老会',
-            headUrl: '/src/assets/pic/head/icon.png'
-          }
-        ]
-      },
-      {
-        name: '我管理的群',
-        number: '0/0',
-        members: []
-      },
-      {
-        name: '我加入的群',
-        number: '0/0',
-        members: []
-      }
-    ])
-    const singleInformation = ref({
-      id: 1000000001,
-      nickname: '努力工作的小熊',
-      headUrl: '/src/assets/pic/head/working_bear.png',
-      email: '2274399174@qq.com',
-      sex: 1,
-      note: '卷王熊',
-      grouping: '元老',
-      signature: '努力拼搏，迎接美好的未来！',
-      country: '中国',
-      location: '江苏·南京',
-      status: 1
-    })
-    const groupInformation = ref({
-      id: 1000000001,
-      name: '元老会',
-      headUrl: '/src/assets/pic/head/icon.png',
-      note: '',
-      nickname: '开国大元帅',
-      introduction: '',
-      announcement: ''
-    })
-    const singleChatHistory = reactive(new Map())
-    const groupChatHistory = reactive(new Map())
+    const chatterUid = ref([0, 0])
+    const infoUid = ref([0, 0])
+    const singleGroupingTypes = ref(['我'])
+    const chatter = ref()
+    const history = ref()
+    const info = ref()
+    const messages = reactive(new Map())
+    const relationships = reactive(new Map())
+    const chatHistory = reactive(new Map())
 
-    const url = ref()
-
-    function toJsonUrl(filename) {
-      return url.value + filename + '.json'
+    function readJson(name) {
+      return assetsStore.readJson('users', `${userStore.currentUser.id}/${name}`)
     }
 
-    function readJson(filename) {
-      return JSON.parse(window.api.read(toJsonUrl(filename)))
+    function writeJson(name, data) {
+      assetsStore.writeJson('users', `${userStore.currentUser.id}/${name}`, data.value)
     }
 
-    function writeJson(filename, data) {
-      window.api.write(toJsonUrl(filename), JSON.stringify(data.value))
+    function uid(type, id) {
+      return `${type === MessageType.SINGLE ? 's' : 'g'}${id}`
     }
 
-    function loadChatHistory() {
-      for (let message of messageList.value) {
-        if (message.type === 'single') singleChatHistory.set(message.id, readJson('s' + message.id))
-        else if (message.type === 'group')
-          singleChatHistory.set(message.id, readJson('g' + message.id))
-      }
+    function changeChatterUid(type, id) {
+      chatterUid.value[0] = type
+      chatterUid.value[1] = id
+      chatter.value = getInfo(type, id)
+      history.value = getChatHistory(type, id)
     }
 
-    function getChatHistory() {
-      if (relationshipType.value === 'single')
-        return singleChatHistory.get(singleInformation.value.id)
-      else if (relationshipType.value === 'group')
-        return groupChatHistory.get(groupInformation.value.id)
-    }
-
-    function addChatHistory(chat) {
-      if (relationshipType.value === 'single')
-        singleChatHistory.get(singleInformation.value.id).push(chat)
-      else if (relationshipType.value === 'group')
-        return groupChatHistory.get(groupInformation.value.id).push(chat)
+    function changeInfoUid(type, id) {
+      infoUid.value[0] = type
+      infoUid.value[1] = id
+      info.value = getInfo(type, id)
     }
 
     function initialize() {
-      url.value = configStore.chatHistoryLocation + userStore.currentUser.id + '/'
-      messageList.value = readJson('message_list')
-      loadChatHistory()
+      axios.post(`/message/latest_messages/${userStore.currentUser.id}`).then((response) => {
+        messageList.value = response.data.data
+        for (let message of messageList.value)
+          messages.set(uid(message.messageType, message.senderId), message)
+        for (let message of readJson('message_list')) {
+          if (!messages.has(uid(message.messageType, message.senderId))) {
+            messages.set(uid(message.messageType, message.senderId), message)
+            messageList.value.push(message)
+          }
+        }
+        relationships.set(uid(MessageType.SINGLE, userStore.currentUser.id), userStore.currentUser)
+        for (let message of messageList.value) getChatHistory(message.messageType, message.senderId)
+      })
+      axios.post(`/relationship/grouping/${userStore.currentUser.id}`).then((response) => {
+        singleGroupingTypes.value.push(...response.data.data)
+      })
     }
 
-    function save() {
+    function addMessage(type, id) {
+      let uuid = uid(type, id)
+      if (!messages.has(uuid)) {
+        let history = getChatHistory(type, id)
+        let message = history[history.length - 1]
+        message.messageType = type
+        message.receiverId = id
+        message.nickname = getInfo(type, id).nickname
+        message.unread = 0
+        messages.set(uuid, message)
+        messageList.value.unshift(message)
+      }
+    }
+
+    function addInfo(type, id, action = () => {}) {
+      let uuid = uid(type, id)
+      if (!relationships.has(uuid)) {
+        axios
+          .post(`/${type === MessageType.SINGLE ? 'user/single_info' : 'group/group_info'}`, {
+            i: userStore.currentUser.id,
+            you: id
+          })
+          .then((response) => {
+            relationships.set(uuid, response.data.data)
+            action()
+          })
+      } else action()
+    }
+
+    function getInfo(type, id) {
+      return relationships.get(uid(type, id))
+    }
+
+    function getChatHistory(type, id) {
+      let uuid = uid(type, id)
+      if (!chatHistory.has(uuid)) {
+        let chats = readJson(uuid)
+        if (Object.keys(chats).length !== 0) {
+          for (let chat of chats) {
+            getInfo(type, id)
+            chat.senderId = chat.a === 1 ? userStore.currentUser.id : id
+            chat.headUrl = relationships.get(uid(MessageType.SINGLE, chat.senderId)).headUrl
+            chat.sendTime = chat.b
+            chat.chatType = chat.c
+            chat.content = chat.d
+            delete chat.a
+            delete chat.b
+            delete chat.c
+            delete chat.d
+          }
+        }
+        return chatHistory.set(uuid, chats).get(uuid)
+      } else return chatHistory.get(uuid)
+    }
+
+    function addChatHistory(t, i, chat) {
+      getChatHistory(t, i).push(chat)
+    }
+
+    function finalize() {
       writeJson('message_list', messageList)
     }
 
     return {
       messageList,
-      relationshipType,
       singleGroupingTypes,
-      singleGrouping,
-      groupGrouping,
-      singleInformation,
-      groupInformation,
-      singleChatHistory,
-      groupChatHistory,
+      chatterUid,
+      infoUid,
+      chatter,
+      history,
+      info,
+      relationships,
+      chatHistory,
+      uid,
+      changeChatterUid,
+      changeInfoUid,
       initialize,
-      save,
+      finalize,
+      addMessage,
+      addInfo,
+      getInfo,
       addChatHistory,
       getChatHistory
     }
-  },
+  }
   // { persist: true }
 )

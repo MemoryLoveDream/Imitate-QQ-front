@@ -54,12 +54,19 @@ const router = createRouter({
               }
             },
             {
-              path: 'relationship',
+              path: 'relationship_single',
               components: {
                 first: () => import('../components/relationship/RelationshipBar.vue'),
-                second: () => import('../views/block/InformationBlock.vue')
+                second: () => import('../views/block/PersonalInformation.vue')
               }
             },
+            {
+              path: 'relationship_group',
+              components: {
+                first: () => import('../components/relationship/RelationshipBar.vue'),
+                second: () => import('../views/block/GroupInformation.vue')
+              }
+            }
           ]
         },
         {
@@ -70,4 +77,5 @@ const router = createRouter({
     }
   ]
 })
+
 export default router

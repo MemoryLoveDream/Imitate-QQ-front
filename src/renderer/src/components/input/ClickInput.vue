@@ -14,7 +14,7 @@ function click() {
 
 function focusout() {
   editable.value = false
-  emit('after-focusout', text)
+  emit('after-focusout', text.value)
 }
 </script>
 

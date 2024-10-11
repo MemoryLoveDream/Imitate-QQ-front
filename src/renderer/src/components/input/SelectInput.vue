@@ -2,7 +2,7 @@
 import { ArrowDownBold, ArrowUpBold, CloseBold } from '@element-plus/icons-vue'
 import { ref, watch } from 'vue'
 
-const props = defineProps({ placeholder: String, selectableItems: Object })
+const props = defineProps({ placeholder: String, selectableItems: Array })
 const emit = defineEmits(['handle-change', 'delete-item'])
 const text = ref('')
 const show = ref(false)
@@ -22,13 +22,13 @@ function selectItem(id) {
   isDown.value = false
 }
 
-function deleteItem(index) {
+function deleteItem(index, id) {
   props.selectableItems.splice(index, 1)
   if (props.selectableItems.length === 0) {
     isDown.value = false
     innerPlaceholder.value = props.placeholder
   }
-  emit('delete-item', index)
+  emit('delete-item', id)
 }
 
 function focusin() {
@@ -76,7 +76,7 @@ defineExpose({ text })
       >
         <el-avatar class="item_avatar" :size="15" :src="item.headUrl" />
         <div class="item_text">{{ item.id }}</div>
-        <el-icon class="item_clear" @click.stop="deleteItem(index)">
+        <el-icon class="item_clear" @click.stop="deleteItem(index, item.id)">
           <CloseBold />
         </el-icon>
       </div>

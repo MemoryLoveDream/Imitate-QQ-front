@@ -3,7 +3,6 @@ import HoverableIcon from '../base/HoverableIcon.vue'
 import { reactive, ref, watch } from 'vue'
 import { useUserStore } from '../../store/user'
 import { useComponentsStore } from '../../store/components'
-import { dateString } from '../../utils/date'
 
 const userStore = useUserStore()
 const componentsStore = useComponentsStore()
@@ -37,8 +36,7 @@ function sendMessage() {
   componentsStore.sendChat({
     senderId: userStore.currentUser.id,
     headUrl: userStore.currentUser.headUrl,
-    sendTime: dateString(),
-    type: 'text',
+    chatType: 1,
     content: text.value
   })
   text.value = ''

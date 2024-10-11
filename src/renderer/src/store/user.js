@@ -1,19 +1,20 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { reactive, ref } from 'vue'
+import { useAssetsStore } from './assets'
 
 export const useUserStore = defineStore(
   'user',
   () => {
+    const assetsStore = useAssetsStore()
+
     const latestLoginedUser = ref({
       id: 1000000000,
-      nickname: '忆恋梦',
-      headUrl: 'img:///E:/project/Vue/easychat-front/config/users/1000000000/head.jpg',
       password: '123456'
     })
     const currentUser = ref({
       id: 1000000000,
       nickname: '忆恋梦',
-      headUrl: 'img:///E:/project/Vue/easychat-front/config/users/1000000000/head.jpg',
+      headUrl: 'img:///E:/project/Vue/easychat-front/assets/users/1000000000/head.jpg',
       email: '2274399174@qq.com',
       sex: 1,
       signature: '或许…等待…美好…',
@@ -21,39 +22,29 @@ export const useUserStore = defineStore(
       location: '江苏·南京',
       status: 1
     })
-    const loginedUsers = ref([
-      {
-        id: 1000000000,
-        nickname: '忆恋梦',
-        headUrl: 'img:///E:/project/Vue/easychat-front/config/users/1000000000/head.jpg'
-      },
-      {
-        id: 1000000001,
-        nickname: '努力工作的小熊',
-        headUrl: '/src/assets/pic/head/working_bear.png'
-      }
-    ])
+    const loginedUsers = reactive(new Map())
 
-    function updateLatestLoginedUser(info, password) {
-      latestLoginedUser.value.id = info.id
-      latestLoginedUser.value.nickname = info.nickname
-      latestLoginedUser.value.headUrl = info.headUrl
+    function readJson(name) {
+      return assetsStore.readJson('users', name)
+    }
+
+    function writeJson(name, data) {
+      assetsStore.writeJson('users', name, data)
+    }
+
+    function updateLatestLoginedUser(id, password) {
+      latestLoginedUser.value.id = id
       latestLoginedUser.value.password = password
     }
 
-    function loginedUsersMap() {
-      let map = new Map()
-      for (let i of loginedUsers.value) {
-        map.set(i.id, i)
+    function initialize() {
+      for (let i of readJson('logined_users')) {
+        loginedUsers.set(i.id, i)
       }
-      console.log(map.get(1000000000))
-      return map
     }
 
-    function initialize() {}
-
-    function read() {
-      console.log(currentUser)
+    function saveLoginedUser() {
+      writeJson('logined_users', [...loginedUsers.values()])
     }
 
     return {
@@ -61,9 +52,8 @@ export const useUserStore = defineStore(
       currentUser,
       loginedUsers,
       updateLatestLoginedUser,
-      loginedUsersMap,
       initialize,
-      read
+      saveLoginedUser
     }
   }
   // { persist: true }

@@ -1,12 +1,17 @@
 <script setup>
-import { ref } from 'vue'
-import ActivatableIcon from '../base/ActivatableIcon.vue'
-import IconText from '../base/IconText.vue'
-import ClickInput from '../input/ClickInput.vue'
+import { onMounted, ref } from 'vue'
+import ActivatableIcon from '../../components/base/ActivatableIcon.vue'
+import IconText from '../../components/base/IconText.vue'
+import ClickInput from '../../components/input/ClickInput.vue'
+import WindowButtons from '../../components/base/WindowButtons.vue'
+import { useUserStore } from '../../store/user'
 import { useRelationshipStore } from '../../store/relationship'
 import { useComponentsStore } from '../../store/components'
 import router from '../../router'
+import axios from 'axios'
+import { ElMessage } from 'element-plus'
 
+const userStore = useUserStore()
 const relationshipStore = useRelationshipStore()
 const componentsStore = useComponentsStore()
 const urls = ref({
@@ -17,30 +22,58 @@ const urls = ref({
 })
 
 function afterFocusout(text) {
-  relationshipStore.singleInformation.nickname = text
+  relationshipStore.info.note = text
+  axios
+    .post('/relationship/update_note', {
+      i: userStore.currentUser.id,
+      you: relationshipStore.info.id,
+      newValue: text
+    })
+    .then((response) => {
+      if (response.data.data === false) ElMessage({ type: 'error', message: '网络连接出错！' })
+    })
+}
+
+function change(value) {
+  relationshipStore.info.grouping = value
+  axios
+    .post('/relationship/update_grouping', {
+      i: userStore.currentUser.id,
+      you: relationshipStore.info.id,
+      newValue: value
+    })
+    .then((response) => {
+      if (response.data.data === false) ElMessage({ type: 'error', message: '网络连接出错！' })
+    })
 }
 
 function click() {
   componentsStore.changeTab(0)
   router.replace('/main/two/message')
+  relationshipStore.addMessage(...relationshipStore.infoUid)
+  relationshipStore.changeChatterUid(...relationshipStore.infoUid)
 }
+
+onMounted(() => {
+  console.log(1000)
+})
 </script>
 
 <template>
-  <div class="personal-information">
-    <div class="card">
+  <div class="personal-relationship.relationshipStore.relationshipStore.information">
+    <div :key="componentsStore.personalInformationKey" class="card">
       <div class="header">
-        <el-avatar class="head" :src="relationshipStore.singleInformation.headUrl" :size="100" />
-        <div class="nickname">{{ relationshipStore.singleInformation.nickname }}</div>
-        <div class="id">id {{ relationshipStore.singleInformation.id }}</div>
+        <el-avatar class="head" :src="relationshipStore.info.headUrl" :size="100" />
+        <div class="nickname">{{ relationshipStore.info.nickname }}</div>
+        <div class="id">id {{ relationshipStore.info.id }}</div>
         <IconText
           class="status"
           :url="
-            relationshipStore.singleInformation.status === 1
+            relationshipStore.info.status === 1
               ? '/src/assets/pic/info/online.svg'
               : '/src/assets/pic/info/offline.svg'
           "
-          :text="relationshipStore.singleInformation.status === 1 ? '在线' : '离线'"
+          :text="relationshipStore.info.status === 1 ? '在线' : '离线'"
           :size="[35, 80, -5]"
         />
         <ActivatableIcon class="thumbs-up" :urls="urls" />
@@ -51,7 +84,7 @@ function click() {
         <ClickInput
           class="note-input"
           placeholder="设置好友备注"
-          :text="relationshipStore.singleInformation.note"
+          :text="relationshipStore.info.note"
           @after-focusout="afterFocusout"
         />
       </div>
@@ -62,7 +95,11 @@ function click() {
           text="好友分组"
           :size="[20, 120, 10]"
         />
-        <el-select v-model="relationshipStore.singleInformation.grouping" class="grouping-select">
+        <el-select
+          v-model="relationshipStore.info.grouping"
+          class="grouping-select"
+          @change="change"
+        >
           <el-option
             v-for="item in relationshipStore.singleGroupingTypes"
             :key="item"
@@ -78,7 +115,7 @@ function click() {
           text="签名"
           :size="[20, 120, 10]"
         />
-        <div class="signature-text">{{ relationshipStore.singleInformation.signature }}</div>
+        <div class="signature-text">{{ relationshipStore.info.signature }}</div>
       </div>
       <div class="divider2"></div>
       <div class="line4">
@@ -87,6 +124,7 @@ function click() {
         <el-button class="btn" color="#0099ff" @click="click">发消息</el-button>
       </div>
     </div>
+    <WindowButtons />
   </div>
 </template>
 

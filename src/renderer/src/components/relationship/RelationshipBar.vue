@@ -1,34 +1,127 @@
 <script setup>
 import { Plus, Search } from '@element-plus/icons-vue'
-import { ref, watch } from 'vue'
+import { onBeforeMount, ref } from 'vue'
 import RelationshipGrouping from './RelationshipGrouping.vue'
 import router from '../../router'
 import { useRelationshipStore } from '../../store/relationship'
+import { useComponentsStore } from '../../store/components'
+import { MessageType } from '../../store/constants'
 
 const relationshipStore = useRelationshipStore()
+const componentsStore = useComponentsStore()
+const singleGrouping = ref([
+  {
+    name: '我',
+    number: '1/1',
+    members: [
+      {
+        type: 1,
+        id: 1000000000,
+        nickname: '忆恋梦',
+        headUrl: 'img:///E:/project/Vue/easychat-front/assets/users/1000000000/head.jpg',
+        signature: '欢迎使用逛逛！'
+      }
+    ]
+  },
+  {
+    name: '元老',
+    number: '5/5',
+    members: [
+      {
+        type: 1,
+        id: 1000000001,
+        nickname: '努力工作的小熊',
+        headUrl: '/src/assets/pic/head/working_bear.png',
+        signature: '努力拼搏，迎接美好的未来！'
+      },
+      {
+        type: 1,
+        id: 1000000002,
+        nickname: '萌萌的小雪人',
+        headUrl: '/src/assets/pic/head/girl_snowman.png',
+        signature: '喜欢下雪的冬天，嘻嘻！'
+      },
+      {
+        type: 1,
+        id: 1000000003,
+        nickname: 'yearbook',
+        headUrl: '/src/assets/pic/head/yearbook.png',
+        signature: 'yearbook！'
+      },
+      {
+        type: 1,
+        id: 1000000004,
+        nickname: '微风滚青草',
+        headUrl: '/src/assets/pic/head/wind_grass.png',
+        signature: '享受风轻轻拂过身体的自由，享受躺在草地上的自在！'
+      },
+      {
+        type: 1,
+        id: 1000000005,
+        nickname: '逃离孤独',
+        headUrl: '/src/assets/pic/head/stones.png',
+        signature: '习惯了一个人的孤独，是否还愿意再入喧嚣！'
+      }
+    ]
+  }
+])
+const groupGrouping = ref([
+  {
+    name: '置顶群',
+    number: '0/0',
+    members: []
+  },
+  {
+    name: '我创建的群',
+    number: '1/1',
+    members: [
+      {
+        type: 2,
+        id: 1000000000,
+        name: '元老会',
+        headUrl: '/src/assets/pic/head/icon.png'
+      }
+    ]
+  },
+  {
+    name: '我管理的群',
+    number: '0/0',
+    members: []
+  },
+  {
+    name: '我加入的群',
+    number: '0/0',
+    members: []
+  }
+])
 const text = ref('')
 const type = ref('single')
 const singleGroupingsRef = ref([])
 const groupGroupingsRef = ref([])
 const selected = ref({ n1: -1, n2: -1, n3: -1 })
 
-watch(selected, () => router.replace('/main/two/relationship'), { once: true })
-
 function afterSelect(code, info) {
-  if (
-    selected.value.n1 !== code.n1 ||
-    selected.value.n2 !== code.n2 ||
-    selected.value.n3 !== code.n3
-  ) {
-    if (selected.value.n1 !== -1 && selected.value.n2 !== -1 && selected.value.n3 !== -1) {
-      if (selected.value.n1 === 1)
-        singleGroupingsRef.value[selected.value.n2].setInactive(selected.value.n3)
-      else groupGroupingsRef.value[selected.value.n2].setInactive(selected.value.n3)
+  relationshipStore.addInfo(info.type, info.id, () => {
+    relationshipStore.changeInfoUid(info.type, info.id)
+    if (
+      selected.value.n1 !== code.n1 ||
+      selected.value.n2 !== code.n2 ||
+      selected.value.n3 !== code.n3
+    ) {
+      if (selected.value.n1 !== -1 && selected.value.n2 !== -1 && selected.value.n3 !== -1) {
+        if (selected.value.n1 === MessageType.SINGLE)
+          singleGroupingsRef.value[selected.value.n2].setInactive(selected.value.n3)
+        else groupGroupingsRef.value[selected.value.n2].setInactive(selected.value.n3)
+      }
+      selected.value = { n1: code.n1, n2: code.n2, n3: code.n3 }
     }
-    selected.value = { n1: code.n1, n2: code.n2, n3: code.n3 }
-  }
-  relationshipStore.relationshipType = info.type
+    if (info.type === MessageType.SINGLE) router.replace('/main/two/relationship_single')
+    else router.replace('relationship_group')
+    componentsStore.refreshInformationBlock()
+  })
 }
+
+onBeforeMount(() => {})
 </script>
 
 <template>
@@ -51,10 +144,10 @@ function afterSelect(code, info) {
   <div class="groupings">
     <div v-show="type === 'single'">
       <RelationshipGrouping
-        v-for="(grouping, index) in relationshipStore.singleGrouping"
+        v-for="(grouping, index) in singleGrouping"
         ref="singleGroupingsRef"
         :key="index"
-        :code="{ n1: 1, n2: index }"
+        :code="{ n1: MessageType.SINGLE, n2: index }"
         class="grouping"
         :grouping="grouping"
         @after-select="afterSelect"
@@ -62,10 +155,10 @@ function afterSelect(code, info) {
     </div>
     <div v-show="type === 'group'">
       <RelationshipGrouping
-        v-for="(grouping, index) in relationshipStore.groupGrouping"
+        v-for="(grouping, index) in groupGrouping"
         ref="groupGroupingsRef"
         :key="index"
-        :code="{ n1: 2, n2: index }"
+        :code="{ n1: MessageType.GROUP, n2: index }"
         class="grouping"
         :grouping="grouping"
         @after-select="afterSelect"

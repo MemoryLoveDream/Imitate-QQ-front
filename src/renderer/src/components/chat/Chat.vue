@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { useUserStore } from '../../store/user'
+import { ChatType } from '../../store/constants'
 
 const userStore = useUserStore()
 const props = defineProps({ chat: Object })
@@ -25,9 +26,9 @@ onMounted(() => {
 <template>
   <div class="chat">
     <el-avatar :class="head" :size="30" :src="props.chat.headUrl" />
-    <div v-if="props.chat.type === 'text'" :class="text">{{ props.chat.content }}</div>
+    <div v-if="props.chat.chatType === ChatType.TEXT" :class="text">{{ props.chat.content }}</div>
     <img
-      v-else-if="props.chat.type === 'picture'"
+      v-else-if="props.chat.chatType === ChatType.PICTURE"
       :class="picture"
       alt="content"
       :src="props.chat.content"

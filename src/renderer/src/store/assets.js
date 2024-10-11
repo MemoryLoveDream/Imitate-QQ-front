@@ -8,16 +8,16 @@ export const useAssetsStore = defineStore(
     const usersLocation = computed(() => assetsLocation.value + 'users/')
     const configLocation = computed(() => assetsLocation.value + 'config/')
 
-    function toJsonUrl(tag, filename) {
-      return assetsLocation.value + tag + filename + '.json'
+    function toJsonUrl(tag, name) {
+      return assetsLocation.value + tag + '/' + name + '.json'
     }
 
-    function readJson(filename) {
-      return JSON.parse(window.api.read(toJsonUrl(filename)))
+    function readJson(tag, name) {
+      return JSON.parse(window.api.read(toJsonUrl(tag, name)))
     }
 
-    function writeJson(filename, data) {
-      window.api.write(toJsonUrl(filename), JSON.stringify(data.value))
+    function writeJson(tag, name, data) {
+      window.api.write(toJsonUrl(tag, name), JSON.stringify(data))
     }
 
     return {

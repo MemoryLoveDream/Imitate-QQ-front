@@ -7,6 +7,7 @@ export const useComponentsStore = defineStore('components', () => {
   const relationshipStore = useRelationshipStore()
 
   const tabs = ref()
+  const messageBar = ref()
   const chatDetails = ref()
   const personalInformationKey = ref(0)
   const groupInformationKey = ref(0)
@@ -28,12 +29,13 @@ export const useComponentsStore = defineStore('components', () => {
   }
 
   function refreshInformationBlock() {
-    if (relationshipStore.infoUid[0] === MessageType.SINGLE) personalInformationKey.value++
+    if (relationshipStore.infoUid[0] === MessageType.PERSON) personalInformationKey.value++
     else if (relationshipStore.infoUid[0] === MessageType.GROUP) groupInformationKey.value++
   }
 
   return {
     tabs,
+    messageBar,
     chatDetails,
     personalInformationKey,
     groupInformationKey,

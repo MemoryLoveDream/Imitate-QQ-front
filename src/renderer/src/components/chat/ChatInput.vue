@@ -53,7 +53,7 @@ watch(text, (value) => {
     <div class="icons">
       <HoverableIcon v-for="icon in icons" :key="icon.name" class="icon" :urls="icon" />
     </div>
-    <textarea v-model="text" class="text" @keyup.enter="sendMessage"></textarea>
+    <textarea v-model="text" class="text" spellcheck="false" @keyup.enter="sendMessage"></textarea>
     <el-button class="btn" color="dodgerblue" :disabled="disabled" @click="sendMessage">
       发送
     </el-button>

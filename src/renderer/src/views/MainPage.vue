@@ -1,12 +1,13 @@
 <script setup>
 import ManagementBar from './ManagementBar.vue'
 import { onBeforeMount, onMounted } from 'vue'
-import router from '../router'
+import { useRouter } from 'vue-router'
 import { useWebSocketStore } from '../store/webSocket'
 import { useRelationshipStore } from '../store/relationship'
 
 const ws = useWebSocketStore()
 const relationshipStore = useRelationshipStore()
+const router = useRouter()
 
 onBeforeMount(() => {
   ws.initWebSocket()

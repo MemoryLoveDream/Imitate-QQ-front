@@ -40,21 +40,23 @@ function mouseOut() {
   if (status.value === 'hover') status.value = 'inactive'
 }
 
-function click() {
-  status.value = 'active'
-  emit('after-select', props.n, props.message.messageType, props.message.senderId)
+function setIsActive(status1) {
+  status.value = status1
+  if (status1 === 'active')
+    emit('after-select', props.n, props.message.messageType, props.message.senderId)
 }
 
-function setInactive() {
-  status.value = 'inactive'
-}
-
-defineExpose({ setInactive })
+defineExpose({ setIsActive })
 </script>
 
 <template>
   <el-badge class="message" :value="unread" :max="99" :show-zero="false" :offset="[-20, 50]">
-    <div :class="message_class" @mouseover="mouseOver" @mouseout="mouseOut" @click="click">
+    <div
+      :class="message_class"
+      @mouseover="mouseOver"
+      @mouseout="mouseOut"
+      @click="setIsActive('active')"
+    >
       <el-avatar class="head" :size="40" :src="props.message.headUrl" />
       <div id="nickname_id" :class="nickname_class">
         {{ props.message.nickname }}

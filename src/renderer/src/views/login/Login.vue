@@ -5,29 +5,25 @@ import FunctionalInput from '../../components/input/FunctionalInput.vue'
 import SelectInput from '../../components/input/SelectInput.vue'
 import { CloseBold } from '@element-plus/icons-vue'
 import { useUserStore } from '../../store/user'
-import router from '../../router'
-import axios from 'axios'
+import api from '../../services/apis'
 import { ElMessage } from 'element-plus'
+import { useRouter } from 'vue-router'
 
 const userStore = useUserStore()
+const router = useRouter()
 const headUrl = ref('/src/assets/pic/head/head.png')
 const select = ref()
 const password = ref()
 
-function login() {
-  axios
-    .post('/user/login', { id: select.value.text, password: password.value.text })
-    .then((response) => {
-      if (response.data.code === 200) {
-        router.replace('/main')
-        window.api.change_size()
-        axios.get('/user/user_info/' + select.value.text).then((response) => {
-          userStore.currentUser = response.data.data
-          userStore.updateLatestLoginedUser(response.data.data.id, password.value.text)
-        })
-      }
-      ElMessage({ type: 'warning', message: '账号或密码错误' })
-    })
+async function login() {
+  let res = await api.login({ id: select.value.text, password: password.value.text })
+  if (res.data.code === 200) {
+    await router.replace('/main')
+    window.api.change_size()
+    res = await api.getUserInfo(select.value.text)
+    userStore.currentUser = res.data.data
+    userStore.updateLatestLoginedUser(res.data.data.id, password.value.text)
+  } else ElMessage({ type: 'warning', message: '账号或密码错误' })
 }
 
 function change(url) {

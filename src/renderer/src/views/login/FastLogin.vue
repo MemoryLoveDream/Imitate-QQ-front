@@ -1,23 +1,22 @@
 <script setup>
 import CloseButton from '../../components/base/CloseButton.vue'
-import axios from 'axios'
-import router from '../../router'
+import api from '../../services/apis'
 import { useUserStore } from '../../store/user'
+import { useRouter } from 'vue-router'
 
 const userStore = useUserStore()
+const router = useRouter()
 const { id, password } = userStore.latestLoginedUser
 const { nickname, headUrl } = userStore.loginedUsers.get(id)
 
-function fastLogin() {
-  axios.post('/user/login', { id: id, password: password }).then((response) => {
-    if (response.data.code === 200) {
-      router.replace('/main')
-      window.api.change_size()
-      axios.get('/user/user_info/' + id).then((response) => {
-        userStore.currentUser = response.data.data
-      })
-    }
-  })
+async function fastLogin() {
+  if ((await api.login({ id: id, password: password })).data.code === 200) {
+    await window.api.hide('main')
+    await router.replace('/main')
+    await window.api.change_size()
+    await window.api.show('main')
+    userStore.currentUser = (await api.getUserInfo(id)).data.data
+  }
 }
 
 function change(url) {

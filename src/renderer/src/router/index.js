@@ -40,10 +40,17 @@ const router = createRouter({
               }
             },
             {
-              path: 'message',
+              path: 'message_person/:index',
               components: {
                 first: () => import('../components/message/MessageBar.vue'),
-                second: () => import('../views/block/ChatBlock.vue')
+                second: () => import('../views/block/PersonalChatBlock.vue')
+              }
+            },
+            {
+              path: 'message_group/:index',
+              components: {
+                first: () => import('../components/message/MessageBar.vue'),
+                second: () => import('../views/block/GroupChatBlock.vue')
               }
             },
             {
@@ -54,7 +61,7 @@ const router = createRouter({
               }
             },
             {
-              path: 'relationship_single',
+              path: 'relationship_person',
               components: {
                 first: () => import('../components/relationship/RelationshipBar.vue'),
                 second: () => import('../views/block/PersonalInformation.vue')

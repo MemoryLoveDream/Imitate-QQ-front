@@ -121,6 +121,18 @@ ipcMain.handle('minimize', (event, name) => {
   } else map.get(name).minimize()
 })
 
+ipcMain.handle('show', (event, name) => {
+  if (name === 'main') {
+    mainWindow.show()
+  } else map.get(name).show()
+})
+
+ipcMain.handle('hide', (event, name) => {
+  if (name === 'main') {
+    mainWindow.hide()
+  } else map.get(name).hide()
+})
+
 ipcMain.handle('quit', (event, name) => {
   if (name === 'main') {
     mainWindow.close()

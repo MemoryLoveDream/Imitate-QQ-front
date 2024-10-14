@@ -1,33 +1,47 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { onMounted, ref } from 'vue'
 import { Plus, Search } from '@element-plus/icons-vue'
 import Message from './Message.vue'
-import router from '../../router'
+import { useRoute, useRouter } from 'vue-router'
 import { useComponentsStore } from '../../store/components'
 import { useRelationshipStore } from '../../store/relationship'
+import { MessageType } from '../../store/constants'
 
 const relationshipStore = useRelationshipStore()
-const components = useComponentsStore()
-
+const componentsStore = useComponentsStore()
+const router = useRouter()
+const route = useRoute()
 const text = ref('')
 const messagesRef = ref([])
 const selected = ref(-1)
 
-watch(selected, () => router.replace('/main/two/message'), { once: true })
+async function afterSelect(n, type, id) {
+  await relationshipStore.changeChatterUid(type, id)
+  if (type === MessageType.PERSON) await router.replace('/main/two/message_person/none')
+  else await router.replace('/main/two/message_group/none')
+  if (selected.value !== n) {
+    if (selected.value !== -1) {
+      messagesRef.value[selected.value].setIsActive('inactive')
+      relationshipStore.messageList[n].unread = 0
 
-function afterSelect(n, type, id) {
-  relationshipStore.addInfo(type, id, () => {
-    relationshipStore.changeChatterUid(type, id)
-    if (selected.value !== n) {
-      if (selected.value !== -1) {
-        messagesRef.value[selected.value].setInactive()
-        // router.replace('/main/two/message')
-        components.refreshChatHistory()
-      }
-      selected.value = n
+      componentsStore.refreshChatHistory()
     }
-  })
+
+    selected.value = n
+  }
 }
+
+function setMessageActive(index) {
+  selected.value = index
+  messagesRef.value[index].setIsActive('active')
+}
+
+defineExpose({ setMessageActive })
+
+onMounted(() => {
+  if (route.params.index !== 'none' && route.params.index !== undefined)
+    setMessageActive(Number(route.params.index))
+})
 </script>
 
 <template class="container">

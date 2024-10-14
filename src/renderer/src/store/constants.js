@@ -1,5 +1,13 @@
+export const Tab = {
+  MESSAGE: 0,
+  RELATIONSHIP: 1,
+  VIDEO: 2,
+  COMMUNITY: 3,
+  EXPLORE: 4
+}
+
 export const MessageType = {
-  SINGLE: 1,
+  PERSON: 1,
   GROUP: 2
 }
 

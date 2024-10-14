@@ -5,15 +5,17 @@ import ClickInput from '../../components/input/ClickInput.vue'
 import CircularChart from '../../components/data/CircularChart.vue'
 import WindowButtons from '../../components/base/WindowButtons.vue'
 import { useComponentsStore } from '../../store/components'
-import axios from 'axios'
+import api from '../../services/apis'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '../../store/user'
 import { useRelationshipStore } from '../../store/relationship'
-import router from "../../router";
+import { useRouter } from 'vue-router'
+import { Tab } from '../../store/constants'
 
 const userStore = useUserStore()
 const relationshipStore = useRelationshipStore()
 const componentsStore = useComponentsStore()
+const router = useRouter()
 const dataset = ref([
   {
     code: 'chart1',
@@ -56,37 +58,32 @@ const dataset = ref([
   }
 ])
 
-function afterFocusout1(text) {
+async function afterFocusout1(text) {
   relationshipStore.info.note = text
-  axios
-    .post('/group_member/update_note', {
-      i: userStore.currentUser.id,
-      you: relationshipStore.info.id,
-      newValue: text
-    })
-    .then((response) => {
-      if (response.data.data === false) ElMessage({ type: 'error', message: '网络连接出错！' })
-    })
+  let res = await api.updateGroupNote({
+    i: userStore.currentUser.id,
+    you: relationshipStore.info.id,
+    newValue: text
+  })
+  if (res.data.data === false) ElMessage({ type: 'error', message: '网络连接出错！' })
 }
 
-function afterFocusout2(text) {
+async function afterFocusout2(text) {
   relationshipStore.info.nickname = text
-  axios
-    .post('/group_member/update_nickname', {
-      i: userStore.currentUser.id,
-      you: relationshipStore.info.id,
-      newValue: text
-    })
-    .then((response) => {
-      if (response.data.data === false) ElMessage({ type: 'error', message: '网络连接出错！' })
-    })
+  let res = await api.updateGroupNickname({
+    i: userStore.currentUser.id,
+    you: relationshipStore.info.id,
+    newValue: text
+  })
+  if (res.data.data === false) ElMessage({ type: 'error', message: '网络连接出错！' })
 }
 
-function click() {
-  componentsStore.changeTab(0)
-  router.replace('/main/two/message')
-  relationshipStore.addMessage(...relationshipStore.infoUid)
-  relationshipStore.changeChatterUid(...relationshipStore.infoUid)
+async function click() {
+  componentsStore.changeTab(Tab.MESSAGE)
+  await router.replace(
+    `/main/two/message_group/${await relationshipStore.addMessage(...relationshipStore.infoUid)}`
+  )
+  await relationshipStore.changeChatterUid(...relationshipStore.infoUid)
 }
 </script>
 

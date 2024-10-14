@@ -1,29 +1,27 @@
 <script setup>
-import router from '../../router'
 import CloseButton from '../../components/base/CloseButton.vue'
 import { ref } from 'vue'
 import { CloseBold } from '@element-plus/icons-vue'
 import FunctionalInput from '../../components/input/FunctionalInput.vue'
 import { useUserStore } from '../../store/user'
-import axios from 'axios'
+import api from '../../services/apis'
+import { useRouter } from 'vue-router'
 
 const userStore = useUserStore()
+const router = useRouter()
 const headUrl = ref('/src/assets/pic/head/head.png')
 const input = ref()
 const password = ref()
 
-function register() {
-  axios
-    .post('/user/register', { nickname: input.value.text, password: password.value.text })
-    .then((response) => {
-      if (response.data.code === 200) {
-        router.replace('/main')
-        window.api.change_size()
-        userStore.currentUser.id = response.data.data
-        userStore.currentUser.nickname = input.value.text
-        userStore.updateLatestLoginedUser(response.data.data, password.value.text)
-      }
-    })
+async function register() {
+  let res = await api.register({ nickname: input.value.text, password: password.value.text })
+  if (res.data.code === 200) {
+    await router.replace('/main')
+    window.api.change_size()
+    userStore.currentUser.id = res.data.data
+    userStore.currentUser.nickname = input.value.text
+    userStore.updateLatestLoginedUser(res.data.data, password.value.text)
+  }
 }
 
 function change(url) {

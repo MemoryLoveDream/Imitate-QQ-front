@@ -2,13 +2,14 @@
 import { Plus, Search } from '@element-plus/icons-vue'
 import { onBeforeMount, ref } from 'vue'
 import RelationshipGrouping from './RelationshipGrouping.vue'
-import router from '../../router'
 import { useRelationshipStore } from '../../store/relationship'
 import { useComponentsStore } from '../../store/components'
 import { MessageType } from '../../store/constants'
+import { useRouter } from 'vue-router'
 
 const relationshipStore = useRelationshipStore()
 const componentsStore = useComponentsStore()
+const router = useRouter()
 const singleGrouping = ref([
   {
     name: '我',
@@ -100,25 +101,23 @@ const singleGroupingsRef = ref([])
 const groupGroupingsRef = ref([])
 const selected = ref({ n1: -1, n2: -1, n3: -1 })
 
-function afterSelect(code, info) {
-  relationshipStore.addInfo(info.type, info.id, () => {
-    relationshipStore.changeInfoUid(info.type, info.id)
-    if (
-      selected.value.n1 !== code.n1 ||
-      selected.value.n2 !== code.n2 ||
-      selected.value.n3 !== code.n3
-    ) {
-      if (selected.value.n1 !== -1 && selected.value.n2 !== -1 && selected.value.n3 !== -1) {
-        if (selected.value.n1 === MessageType.SINGLE)
-          singleGroupingsRef.value[selected.value.n2].setInactive(selected.value.n3)
-        else groupGroupingsRef.value[selected.value.n2].setInactive(selected.value.n3)
-      }
-      selected.value = { n1: code.n1, n2: code.n2, n3: code.n3 }
+async function afterSelect(code, info) {
+  await relationshipStore.changeInfoUid(info.type, info.id)
+  if (
+    selected.value.n1 !== code.n1 ||
+    selected.value.n2 !== code.n2 ||
+    selected.value.n3 !== code.n3
+  ) {
+    if (selected.value.n1 !== -1 && selected.value.n2 !== -1 && selected.value.n3 !== -1) {
+      if (selected.value.n1 === MessageType.PERSON)
+        singleGroupingsRef.value[selected.value.n2].setInactive(selected.value.n3)
+      else groupGroupingsRef.value[selected.value.n2].setInactive(selected.value.n3)
     }
-    if (info.type === MessageType.SINGLE) router.replace('/main/two/relationship_single')
-    else router.replace('relationship_group')
-    componentsStore.refreshInformationBlock()
-  })
+    selected.value = { n1: code.n1, n2: code.n2, n3: code.n3 }
+  }
+  if (info.type === MessageType.PERSON) await router.replace('/main/two/relationship_person')
+  else await router.replace('/main/two/relationship_group')
+  componentsStore.refreshInformationBlock()
 }
 
 onBeforeMount(() => {})
@@ -147,7 +146,7 @@ onBeforeMount(() => {})
         v-for="(grouping, index) in singleGrouping"
         ref="singleGroupingsRef"
         :key="index"
-        :code="{ n1: MessageType.SINGLE, n2: index }"
+        :code="{ n1: MessageType.PERSON, n2: index }"
         class="grouping"
         :grouping="grouping"
         @after-select="afterSelect"

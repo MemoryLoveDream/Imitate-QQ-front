@@ -1,8 +1,9 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
 import ActivatableIcon from './base/ActivatableIcon.vue'
-import router from '../router'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const tabs = reactive([
   {
     name: '消息',

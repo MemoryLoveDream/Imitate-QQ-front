@@ -18,6 +18,12 @@ const api = {
   minimize: (name) => {
     ipcRenderer.invoke('minimize', name).then(() => {})
   },
+  show: (name) => {
+    ipcRenderer.invoke('show', name).then(() => {})
+  },
+  hide: (name) => {
+    ipcRenderer.invoke('hide', name).then(() => {})
+  },
   create_child: (name, width, height, router) => {
     ipcRenderer.invoke('create_child', name, width, height, router).then(() => {})
   },

@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import ActivatableIcon from '../../components/base/ActivatableIcon.vue'
 import IconText from '../../components/base/IconText.vue'
 import ClickInput from '../../components/input/ClickInput.vue'
@@ -7,13 +7,15 @@ import WindowButtons from '../../components/base/WindowButtons.vue'
 import { useUserStore } from '../../store/user'
 import { useRelationshipStore } from '../../store/relationship'
 import { useComponentsStore } from '../../store/components'
-import router from '../../router'
-import axios from 'axios'
+import { useRouter } from 'vue-router'
+import api from '../../services/apis'
 import { ElMessage } from 'element-plus'
+import { Tab } from '../../store/constants'
 
 const userStore = useUserStore()
 const relationshipStore = useRelationshipStore()
 const componentsStore = useComponentsStore()
+const router = useRouter()
 const urls = ref({
   name: 'PersonalInformation',
   inactive_url: '/src/assets/pic/info/thumbs_up.svg',
@@ -21,42 +23,33 @@ const urls = ref({
   click: () => {}
 })
 
-function afterFocusout(text) {
+async function afterFocusout(text) {
   relationshipStore.info.note = text
-  axios
-    .post('/relationship/update_note', {
-      i: userStore.currentUser.id,
-      you: relationshipStore.info.id,
-      newValue: text
-    })
-    .then((response) => {
-      if (response.data.data === false) ElMessage({ type: 'error', message: '网络连接出错！' })
-    })
+  let res = await api.updatePersonalNote({
+    i: userStore.currentUser.id,
+    you: relationshipStore.info.id,
+    newValue: text
+  })
+  if (res.data.data === false) ElMessage({ type: 'error', message: '网络连接出错！' })
 }
 
-function change(value) {
+async function change(value) {
   relationshipStore.info.grouping = value
-  axios
-    .post('/relationship/update_grouping', {
-      i: userStore.currentUser.id,
-      you: relationshipStore.info.id,
-      newValue: value
-    })
-    .then((response) => {
-      if (response.data.data === false) ElMessage({ type: 'error', message: '网络连接出错！' })
-    })
+  let res = await api.updatePersonalGrouping({
+    i: userStore.currentUser.id,
+    you: relationshipStore.info.id,
+    newValue: value
+  })
+  if (res.data.data === false) ElMessage({ type: 'error', message: '网络连接出错！' })
 }
 
-function click() {
-  componentsStore.changeTab(0)
-  router.replace('/main/two/message')
-  relationshipStore.addMessage(...relationshipStore.infoUid)
-  relationshipStore.changeChatterUid(...relationshipStore.infoUid)
+async function click() {
+  componentsStore.changeTab(Tab.MESSAGE)
+  await router.replace(
+    `/main/two/message_person/${await relationshipStore.addMessage(...relationshipStore.infoUid)}`
+  )
+  await relationshipStore.changeChatterUid(...relationshipStore.infoUid)
 }
-
-onMounted(() => {
-  console.log(1000)
-})
 </script>
 
 <template>
@@ -101,7 +94,7 @@ onMounted(() => {
           @change="change"
         >
           <el-option
-            v-for="item in relationshipStore.singleGroupingTypes"
+            v-for="item in relationshipStore.personalGroupingTypes"
             :key="item"
             :label="item"
             :value="item"

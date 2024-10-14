@@ -2,8 +2,8 @@ import { defineStore } from 'pinia'
 import { reactive, ref } from 'vue'
 import { useAssetsStore } from './assets'
 import { useUserStore } from './user'
-import axios from 'axios'
 import { MessageType } from './constants'
+import api from '../services/apis'
 
 export const useRelationshipStore = defineStore(
   'relationship',
@@ -12,13 +12,13 @@ export const useRelationshipStore = defineStore(
     const userStore = useUserStore()
 
     const messageList = ref([])
+    const messages = reactive(new Map())
     const chatterUid = ref([0, 0])
     const infoUid = ref([0, 0])
-    const singleGroupingTypes = ref(['我'])
+    const personalGroupingTypes = ref(['我'])
     const chatter = ref()
     const history = ref()
     const info = ref()
-    const messages = reactive(new Map())
     const relationships = reactive(new Map())
     const chatHistory = reactive(new Map())
 
@@ -31,98 +31,101 @@ export const useRelationshipStore = defineStore(
     }
 
     function uid(type, id) {
-      return `${type === MessageType.SINGLE ? 's' : 'g'}${id}`
+      return `${type === MessageType.PERSON ? 's' : 'g'}${id}`
     }
 
-    function changeChatterUid(type, id) {
+    function uid1(item) {
+      return uid(item.messageType, item.senderId)
+    }
+
+    async function changeChatterUid(type, id) {
       chatterUid.value[0] = type
       chatterUid.value[1] = id
-      chatter.value = getInfo(type, id)
-      history.value = getChatHistory(type, id)
+      chatter.value = await getInfo(type, id)
+      history.value = await getChatHistory(type, id)
     }
 
-    function changeInfoUid(type, id) {
+    async function changeInfoUid(type, id) {
       infoUid.value[0] = type
       infoUid.value[1] = id
-      info.value = getInfo(type, id)
+      info.value = await getInfo(type, id)
     }
 
-    function initialize() {
-      axios.post(`/message/latest_messages/${userStore.currentUser.id}`).then((response) => {
-        messageList.value = response.data.data
-        for (let message of messageList.value)
-          messages.set(uid(message.messageType, message.senderId), message)
-        for (let message of readJson('message_list')) {
-          if (!messages.has(uid(message.messageType, message.senderId))) {
-            messages.set(uid(message.messageType, message.senderId), message)
-            messageList.value.push(message)
-          }
+    async function initialize() {
+      let res = await api.getLatestMessages(userStore.currentUser.id)
+      messageList.value = res.data.data
+      messageList.value.forEach((item) => messages.set(uid1(item), item))
+      readJson('message_list').forEach((item) => {
+        if (!messages.has(uid1(item))) {
+          messages.set(uid1(item), item)
+          messageList.value.push(item)
         }
-        relationships.set(uid(MessageType.SINGLE, userStore.currentUser.id), userStore.currentUser)
-        for (let message of messageList.value) getChatHistory(message.messageType, message.senderId)
       })
-      axios.post(`/relationship/grouping/${userStore.currentUser.id}`).then((response) => {
-        singleGroupingTypes.value.push(...response.data.data)
-      })
+      relationships.set(uid(MessageType.PERSON, userStore.currentUser.id), userStore.currentUser)
+      for (const item of messageList.value) {
+        await getInfo(item.messageType, item.senderId)
+        await getChatHistory(item.messageType, item.senderId)
+      }
+
+      res = await api.getPersonalGroupingTypes(userStore.currentUser.id)
+      personalGroupingTypes.value = res.data.data
     }
 
-    function addMessage(type, id) {
+    async function addMessage(type, id) {
       let uuid = uid(type, id)
       if (!messages.has(uuid)) {
-        let history = getChatHistory(type, id)
+        let history = await getChatHistory(type, id)
         let message = history[history.length - 1]
         message.messageType = type
-        message.receiverId = id
-        message.nickname = getInfo(type, id).nickname
+        message.nickname = await getInfo(type, id).nickname
         message.unread = 0
         messages.set(uuid, message)
         messageList.value.unshift(message)
-      }
+        return 0
+      } else
+        for (let index in messageList.value)
+          if (
+            messageList.value[index].messageType === type &&
+            messageList.value[index].senderId === id
+          )
+            return index
     }
 
-    function addInfo(type, id, action = () => {}) {
+    async function getInfo(type, id) {
       let uuid = uid(type, id)
       if (!relationships.has(uuid)) {
-        axios
-          .post(`/${type === MessageType.SINGLE ? 'user/single_info' : 'group/group_info'}`, {
-            i: userStore.currentUser.id,
-            you: id
-          })
-          .then((response) => {
-            relationships.set(uuid, response.data.data)
-            action()
-          })
-      } else action()
+        let data = { i: userStore.currentUser.id, you: id }
+        let res =
+          type === MessageType.PERSON
+            ? await api.getPersonalInfo(data)
+            : await api.getGroupInfo(data)
+        relationships.set(uuid, res.data.data)
+      }
+      return relationships.get(uuid)
     }
 
-    function getInfo(type, id) {
-      return relationships.get(uid(type, id))
-    }
-
-    function getChatHistory(type, id) {
+    async function getChatHistory(type, id) {
       let uuid = uid(type, id)
       if (!chatHistory.has(uuid)) {
         let chats = readJson(uuid)
         if (Object.keys(chats).length !== 0) {
           for (let chat of chats) {
-            getInfo(type, id)
-            chat.senderId = chat.a === 1 ? userStore.currentUser.id : id
-            chat.headUrl = relationships.get(uid(MessageType.SINGLE, chat.senderId)).headUrl
-            chat.sendTime = chat.b
-            chat.chatType = chat.c
-            chat.content = chat.d
-            delete chat.a
-            delete chat.b
-            delete chat.c
-            delete chat.d
+            await getInfo(type, id)
+            let src = ['a', 'b', 'c', 'd']
+            for (let i = 0; i < 4; i++) {
+              chat[['senderId', 'sendTime', 'chatType', 'content'][i]] = chat[src[i]]
+              delete chat[src[i]]
+            }
+            chat.senderId = chat.senderId === 1 ? userStore.currentUser.id : id
+            chat.headUrl = relationships.get(uid(MessageType.PERSON, chat.senderId)).headUrl
           }
         }
         return chatHistory.set(uuid, chats).get(uuid)
       } else return chatHistory.get(uuid)
     }
 
-    function addChatHistory(t, i, chat) {
-      getChatHistory(t, i).push(chat)
+    async function addChatHistory(type, id, chat) {
+      ;(await getChatHistory(type, id)).push(chat)
     }
 
     function finalize() {
@@ -131,7 +134,7 @@ export const useRelationshipStore = defineStore(
 
     return {
       messageList,
-      singleGroupingTypes,
+      personalGroupingTypes,
       chatterUid,
       infoUid,
       chatter,
@@ -145,7 +148,6 @@ export const useRelationshipStore = defineStore(
       initialize,
       finalize,
       addMessage,
-      addInfo,
       getInfo,
       addChatHistory,
       getChatHistory

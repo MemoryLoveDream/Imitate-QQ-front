@@ -61,9 +61,9 @@ defineExpose({ setIsActive })
       <div id="nickname_id" :class="nickname_class">
         {{ props.message.nickname }}
       </div>
-      <div id="date_id" :class="date_class">{{ dateFormat(props.message.sendTime) }}</div>
+      <div id="date_id" :class="date_class">{{ dateFormat(props.message?.sendTime) }}</div>
       <div id="latest_message_id" :class="latest_message_class">
-        {{ props.message.content }}
+        {{ props.message?.content }}
       </div>
     </div>
   </el-badge>

@@ -11,6 +11,7 @@ export const useWebSocketStore = defineStore('ws', () => {
 
   function webSocketOnMessage(e) {
     let signal = JSON.parse(e.data)
+    console.log(e.data)
     if (signal.signalType === SignalType.SEND_CHAT) {
       let chat = JSON.parse(signal.content)
       delete chat.receiverId

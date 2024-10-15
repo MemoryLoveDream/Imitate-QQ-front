@@ -12,10 +12,10 @@ const { nickname, headUrl } = userStore.loginedUsers.get(id)
 async function fastLogin() {
   if ((await api.login({ id: id, password: password })).data.code === 200) {
     await window.api.hide('main')
+    userStore.currentUser = (await api.getUserInfo(id)).data.data
     await router.replace('/main')
     await window.api.change_size()
     await window.api.show('main')
-    userStore.currentUser = (await api.getUserInfo(id)).data.data
   }
 }
 

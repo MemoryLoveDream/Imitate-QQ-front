@@ -75,7 +75,9 @@ export const useRelationshipStore = defineStore(
       let uuid = uid(type, id)
       if (!messages.has(uuid)) {
         let history = await getChatHistory(type, id)
-        let message = history[history.length - 1]
+        let message
+        if (history.length === 0) message = {}
+        else message = history[history.length - 1]
         message.messageType = type
         message.nickname = await getInfo(type, id).nickname
         message.unread = 0

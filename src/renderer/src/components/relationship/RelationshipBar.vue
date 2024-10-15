@@ -2,14 +2,18 @@
 import { Plus, Search } from '@element-plus/icons-vue'
 import { onBeforeMount, ref } from 'vue'
 import RelationshipGrouping from './RelationshipGrouping.vue'
+import { useUserStore } from '../../store/user'
 import { useRelationshipStore } from '../../store/relationship'
 import { useComponentsStore } from '../../store/components'
 import { MessageType } from '../../store/constants'
 import { useRouter } from 'vue-router'
+import api from '../../services/apis'
 
+const userStore = useUserStore()
 const relationshipStore = useRelationshipStore()
 const componentsStore = useComponentsStore()
 const router = useRouter()
+const personalGrouping = ref([])
 const singleGrouping = ref([
   {
     name: '我',
@@ -120,7 +124,9 @@ async function afterSelect(code, info) {
   componentsStore.refreshInformationBlock()
 }
 
-onBeforeMount(() => {})
+onBeforeMount(async () => {
+  personalGrouping.value = (await api.getPersonalGrouping(userStore.currentUser.id)).data.data
+})
 </script>
 
 <template>
@@ -143,7 +149,7 @@ onBeforeMount(() => {})
   <div class="groupings">
     <div v-show="type === 'single'">
       <RelationshipGrouping
-        v-for="(grouping, index) in singleGrouping"
+        v-for="(grouping, index) in personalGrouping"
         ref="singleGroupingsRef"
         :key="index"
         :code="{ n1: MessageType.PERSON, n2: index }"

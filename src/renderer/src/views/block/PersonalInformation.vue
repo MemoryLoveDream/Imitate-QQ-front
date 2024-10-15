@@ -45,10 +45,10 @@ async function change(value) {
 
 async function click() {
   componentsStore.changeTab(Tab.MESSAGE)
+  await relationshipStore.changeChatterUid(...relationshipStore.infoUid)
   await router.replace(
     `/main/two/message_person/${await relationshipStore.addMessage(...relationshipStore.infoUid)}`
   )
-  await relationshipStore.changeChatterUid(...relationshipStore.infoUid)
 }
 </script>
 

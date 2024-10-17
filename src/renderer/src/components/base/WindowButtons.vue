@@ -25,18 +25,24 @@ function maximize() {
 </script>
 
 <template>
-  <div class="minimize" @click="minimize">
-    <el-icon class="icon" color="#333">
-      <Minus />
-    </el-icon>
+  <div class="window-buttons">
+    <div class="minimize" @click="minimize">
+      <el-icon class="icon" color="#333">
+        <Minus />
+      </el-icon>
+    </div>
+    <div class="maximize" @click="maximize">
+      <img class="svg" :src="url" alt="" />
+    </div>
+    <CloseButton :name="props.name" />
   </div>
-  <div class="maximize" @click="maximize">
-    <img class="svg" :src="url" alt="" />
-  </div>
-  <CloseButton :name="props.name" />
 </template>
 
 <style scoped lang="less">
+.window-buttons {
+  -webkit-app-region: no-drag;
+}
+
 .maximize {
   position: absolute;
   top: 0;

@@ -6,9 +6,10 @@ import fs from 'fs'
 import { dialog } from 'electron'
 
 const path = require('path')
-
 let mainWindow
 const map = new Map()
+
+let peerId = ''
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -164,4 +165,16 @@ ipcMain.on('get_project_path', (event) => {
 
 ipcMain.on('make_dir', (event, name) => {
   fs.mkdirSync(name)
+})
+
+ipcMain.on('get_project_path', (event) => {
+  event.returnValue = process.env['INIT_CWD']
+})
+
+ipcMain.on('set_peer_id', (event, id) => {
+  peerId = id
+})
+
+ipcMain.on('get_peer_id', (event) => {
+  event.returnValue = peerId
 })

@@ -40,7 +40,13 @@ const api = {
     return ipcRenderer.sendSync('get_project_path')
   },
   makeDir: (name) => {
-    return ipcRenderer.sendSync('make_dir', name)
+    ipcRenderer.sendSync('make_dir', name)
+  },
+  setPeerId: (id) => {
+    ipcRenderer.sendSync('set_peer_id', id)
+  },
+  getPeerId: () => {
+    return ipcRenderer.sendSync('get_peer_id')
   }
 }
 

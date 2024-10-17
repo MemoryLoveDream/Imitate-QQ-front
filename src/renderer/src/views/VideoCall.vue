@@ -1,19 +1,22 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onBeforeMount, onMounted, ref } from 'vue'
 import Peer from 'peerjs'
 import WindowButtons from '../components/base/WindowButtons.vue'
-import { useComponentsStore } from '../store/components'
 import { useWebSocketStore } from '../store/webSocket'
+import { useRoute } from 'vue-router'
 
-const componentsStore = useComponentsStore()
 const ws = useWebSocketStore()
+const route = useRoute()
 
 const localCameraVideo = ref()
 const remoteCameraVideo = ref()
-const localMediaStream = ref()
-const peer = ref()
-const call = ref()
-const peerId = ref()
+let localMediaStream
+let callerId
+let calleeId
+let peer
+let call
+let peerId
+let anotherPeerId = ''
 
 function getUserMedia(constrains, success) {
   if (window.navigator.mediaDevices.getUserMedia) {
@@ -28,10 +31,10 @@ function getUserMedia(constrains, success) {
 }
 
 async function startCaller() {
-  localMediaStream.value = await getUserMedia({ audio: true, video: true })
-  localCameraVideo.value.srcObject = localMediaStream.value
+  localMediaStream = await getUserMedia({ audio: true, video: true })
+  localCameraVideo.value.srcObject = localMediaStream
   localCameraVideo.value.play()
-  peer.value = new Peer({
+  peer = new Peer({
     config: {
       iceServers: [
         {
@@ -47,13 +50,12 @@ async function startCaller() {
       ]
     }
   })
-  peer.value.on('open', (id) => {
-    peerId.value = id
-    componentsStore.peerId = id
-    console.log('My peer ID is: ' + peerId.value)
+  peer.on('open', (id) => {
+    peerId = id
+    console.log('My peer ID is: ' + peerId)
   })
-  peer.value.on('call', (call) => {
-    call.answer(localMediaStream.value)
+  peer.on('call', (call) => {
+    call.answer(localMediaStream)
     call.on('stream', (stream) => {
       remoteCameraVideo.value.srcObject = stream
       remoteCameraVideo.value.play()
@@ -62,29 +64,49 @@ async function startCaller() {
 }
 
 function startCall() {
-  call.value = peer.value.call(ws.othersPeerId, localMediaStream.value)
-  call.value.on('stream', (stream) => {
+  call = peer.call(anotherPeerId, localMediaStream)
+  call.on('stream', (stream) => {
     remoteCameraVideo.value.srcObject = stream
     remoteCameraVideo.value.play()
   })
-  call.value.on('close', () => {
+  call.on('close', () => {
     console.log('结束')
   })
-  call.value.on('error', (err) => {
+  call.on('error', (err) => {
     console.log(err)
   })
 }
 
 function endCall() {
-  if (call.value) {
-    call.value.close()
-    call.value = null
+  if (call) {
+    call.close()
+    call = null
   }
 }
 
+onBeforeMount(() => {
+  ws.anonymousInit()
+})
+
 onMounted(async () => {
+  setInterval(() => {
+    if (window.api.getPeerId() !== '') {
+      anotherPeerId = window.api.getPeerId()
+      window.api.setPeerId('')
+      startCall()
+    }
+  }, 2000)
   await startCaller()
-  startCall()
+  if (route.params.c1 !== 'none') {
+    if (route.params.c1 === 'called') {
+      callerId = Number(route.params.c2)
+      ws.sendPeerId(callerId, peerId)
+    } else {
+      callerId = Number(route.params.c1)
+      calleeId = Number(route.params.c2)
+    }
+  }
+  ws.requestPeerId(callerId, calleeId)
 })
 </script>
 
@@ -92,6 +114,7 @@ onMounted(async () => {
   <div class="video-call">
     <video ref="remoteCameraVideo" class="you"></video>
     <video ref="localCameraVideo" class="i"></video>
+    <div class="drag"></div>
     <WindowButtons name="video_call" />
   </div>
 </template>
@@ -111,5 +134,13 @@ onMounted(async () => {
   top: 0;
   left: 0;
   background-color: black;
+}
+
+.drag {
+  position: absolute;
+  height: 20px;
+  width: 80%;
+  background-color: transparent;
+  -webkit-app-region: drag;
 }
 </style>

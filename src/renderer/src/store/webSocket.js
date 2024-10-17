@@ -8,8 +8,6 @@ export const useWebSocketStore = defineStore('ws', () => {
   const userStore = useUserStore()
   const componentsStore = useComponentsStore()
   const ws = ref()
-  const peerId = ref()
-  const othersPeerId = ref()
 
   async function webSocketOnMessage(e) {
     let signal = JSON.parse(e.data)
@@ -19,10 +17,11 @@ export const useWebSocketStore = defineStore('ws', () => {
       delete chat.receiverId
       await componentsStore.addChat(chat.messageType, chat.senderId, chat)
     } else if (signal.signalType === SignalType.REQUEST_PEER_ID) {
-      await window.api.createChild('video_call', 700, 680, '/video_call')
-      sendSignal({ signalType: SignalType.SEND_PEER_ID, content: `${peerId.value}` })
+      let call = JSON.parse(signal.content)
+      await window.api.createChild('video_call', 700, 680, `/video_call/called/${call.callerId}`)
     } else if (signal.signalType === SignalType.SEND_PEER_ID) {
-      othersPeerId.value = signal.content
+      let peer = JSON.parse(signal.content)
+      window.api.setPeerId(peer.peerId)
     }
   }
 
@@ -42,19 +41,42 @@ export const useWebSocketStore = defineStore('ws', () => {
     })
   }
 
+  function anonymousInit() {
+    ws.value = new WebSocket('ws://localhost:8888/ws')
+    ws.value.onmessage = webSocketOnMessage
+    ws.value.onerror = () => console.log('后端没开！')
+    ws.value.onclose = () => console.log('断开连接！')
+  }
+
   function sendSignal(object) {
     ws.value.send(JSON.stringify(object))
   }
 
-  function sendMessage(object) {
-    sendSignal({ signalType: SignalType.SEND_CHAT, content: JSON.stringify(object) })
+  function sendMessage(chat) {
+    sendSignal({ signalType: SignalType.SEND_CHAT, content: JSON.stringify(chat) })
+  }
+
+  function requestPeerId(callerId, calleeId) {
+    sendSignal({
+      signalType: SignalType.REQUEST_PEER_ID,
+      content: JSON.stringify({ callerId: callerId, calleeId: calleeId })
+    })
+  }
+
+  function sendPeerId(callerId, peerId) {
+    sendSignal({
+      signalType: SignalType.SEND_PEER_ID,
+      content: JSON.stringify({ callerId: callerId, peerId: peerId })
+    })
   }
 
   return {
-    peerId,
-    othersPeerId,
+    ws,
     initWebSocket,
+    anonymousInit,
     sendSignal,
-    sendMessage
+    sendMessage,
+    requestPeerId,
+    sendPeerId
   }
 })

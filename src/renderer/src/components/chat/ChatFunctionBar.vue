@@ -2,7 +2,9 @@
 import HoverableIcon from '../base/HoverableIcon.vue'
 import { reactive } from 'vue'
 import { useRelationshipStore } from '../../store/relationship'
+import { useUserStore } from '../../store/user'
 
+const userStore = useUserStore()
 const relationshipStore = useRelationshipStore()
 const icons = reactive([
   {
@@ -15,7 +17,12 @@ const icons = reactive([
     inactive_url: '/src/assets/pic/chat_function_bar/video_call.svg',
     hover_url: '/src/assets/pic/chat_function_bar/video_call_hover.svg',
     click: () => {
-      window.api.createChild('video_call', 700, 680, '/video_call')
+      window.api.createChild(
+        'video_call',
+        700,
+        680,
+        `/video_call/${userStore.currentUser.id}/${relationshipStore.chatter.id}`
+      )
     }
   },
   {

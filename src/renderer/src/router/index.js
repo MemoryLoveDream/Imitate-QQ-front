@@ -25,6 +25,10 @@ const router = createRouter({
       component: () => import('../views/ShortVideo.vue')
     },
     {
+      path: '/video_call',
+      component: () => import('../views/VideoCall.vue')
+    },
+    {
       path: '/main',
       component: () => import('../views/MainPage.vue'),
       children: [

@@ -5,9 +5,7 @@ import WindowButtons from '../components/base/WindowButtons.vue'
 <template>
   <div class="short-video">
     <div class="header-bar"><WindowButtons name="video" /></div>
-    <video class="video" src="E:/铭冥/2023/冬日散步.mp4" autoplay>
-
-    </video>
+    <video class="video" src="E:/铭冥/2023/冬日散步.mp4" autoplay></video>
   </div>
 </template>
 

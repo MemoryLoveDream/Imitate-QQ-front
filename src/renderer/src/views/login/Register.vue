@@ -17,7 +17,7 @@ async function register() {
   let res = await api.register({ nickname: input.value.text, password: password.value.text })
   if (res.data.code === 200) {
     await router.replace('/main')
-    window.api.change_size()
+    window.api.changeSize()
     userStore.currentUser.id = res.data.data
     userStore.currentUser.nickname = input.value.text
     userStore.updateLatestLoginedUser(res.data.data, password.value.text)
@@ -31,7 +31,7 @@ function change(url) {
 function change_head() {
   headUrl.value =
     'img:///' +
-    window.api.select_file({
+    window.api.selectFile({
       properties: ['openFile']
     })
   // window

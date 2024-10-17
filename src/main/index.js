@@ -157,3 +157,11 @@ ipcMain.on('read', (event, path) => {
 ipcMain.on('select_file', (event, options) => {
   event.returnValue = dialog.showOpenDialogSync(options)
 })
+
+ipcMain.on('get_project_path', (event) => {
+  event.returnValue = process.env['INIT_CWD']
+})
+
+ipcMain.on('make_dir', (event, name) => {
+  fs.mkdirSync(name)
+})

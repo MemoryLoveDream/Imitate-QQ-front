@@ -11,36 +11,28 @@ export const useUserStore = defineStore(
       id: 1000000000,
       password: '123456'
     })
-    const currentUser = ref({
-      id: 1000000000,
-      nickname: '忆恋梦',
-      headUrl: 'img:///E:/project/Vue/easychat-front/assets/users/1000000000/head.jpg',
-      email: '2274399174@qq.com',
-      sex: 1,
-      signature: '或许…等待…美好…',
-      country: '中国',
-      location: '江苏·南京',
-      status: 1
-    })
+    const currentUser = ref()
     const loginedUsers = reactive(new Map())
 
-    function readJson(name) {
-      return assetsStore.readJson('users', name)
+    function initialize() {
+      readJson('logined_users').forEach((user) => loginedUsers.set(user.id, user))
     }
 
-    function writeJson(name, data) {
-      assetsStore.writeJson('users', name, data)
+    function toJsonUrl(name) {
+      return `${assetsStore.usersLocation}${name}.json`
+    }
+
+    function readJson(name) {
+      return JSON.parse(window.api.read(toJsonUrl(name)))
+    }
+
+    function writeJson(name, data, space = '') {
+      window.api.write(toJsonUrl(name), JSON.stringify(data, null, space))
     }
 
     function updateLatestLoginedUser(id, password) {
       latestLoginedUser.value.id = id
       latestLoginedUser.value.password = password
-    }
-
-    function initialize() {
-      for (let i of readJson('logined_users')) {
-        loginedUsers.set(i.id, i)
-      }
     }
 
     function saveLoginedUser() {
@@ -51,8 +43,10 @@ export const useUserStore = defineStore(
       latestLoginedUser,
       currentUser,
       loginedUsers,
-      updateLatestLoginedUser,
       initialize,
+      readJson,
+      writeJson,
+      updateLatestLoginedUser,
       saveLoginedUser
     }
   }

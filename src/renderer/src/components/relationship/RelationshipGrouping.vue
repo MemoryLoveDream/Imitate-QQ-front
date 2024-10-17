@@ -46,7 +46,7 @@ onMounted(() => {
         <ArrowDownBold v-if="isDown" />
       </el-icon>
       <div class="name">{{ props.grouping.name }}</div>
-      <div class="number">{{ props.grouping.number }}</div>
+      <div class="number">{{ props.grouping.onlineNumber }}/{{ props.grouping.number }}</div>
     </div>
     <div v-show="isDown" ref="members" class="members">
       <GroupingMember

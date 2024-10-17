@@ -18,7 +18,14 @@ onMounted(() => {
 </script>
 
 <template>
-  <img ref="icon" :alt="props.urls.name" :src="url" @mouseover="mouseOver" @mouseout="mouseOut" />
+  <img
+    ref="icon"
+    alt=""
+    :src="url"
+    @mouseover="mouseOver"
+    @mouseout="mouseOut"
+    @click="props.urls.click"
+  />
 </template>
 
 <style scoped lang="less"></style>

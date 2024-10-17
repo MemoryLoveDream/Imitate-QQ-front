@@ -8,14 +8,21 @@ export const useWebSocketStore = defineStore('ws', () => {
   const userStore = useUserStore()
   const componentsStore = useComponentsStore()
   const ws = ref()
+  const peerId = ref()
+  const othersPeerId = ref()
 
-  function webSocketOnMessage(e) {
+  async function webSocketOnMessage(e) {
     let signal = JSON.parse(e.data)
     console.log(e.data)
     if (signal.signalType === SignalType.SEND_CHAT) {
       let chat = JSON.parse(signal.content)
       delete chat.receiverId
-      componentsStore.addChat(chat.messageType, chat.senderId, chat)
+      await componentsStore.addChat(chat.messageType, chat.senderId, chat)
+    } else if (signal.signalType === SignalType.REQUEST_PEER_ID) {
+      await window.api.createChild('video_call', 700, 680, '/video_call')
+      sendSignal({ signalType: SignalType.SEND_PEER_ID, content: `${peerId.value}` })
+    } else if (signal.signalType === SignalType.SEND_PEER_ID) {
+      othersPeerId.value = signal.content
     }
   }
 
@@ -44,6 +51,8 @@ export const useWebSocketStore = defineStore('ws', () => {
   }
 
   return {
+    peerId,
+    othersPeerId,
     initWebSocket,
     sendSignal,
     sendMessage

@@ -21,7 +21,9 @@ export const SignalType = {
   FIRST_CONNECTION: 1,
   SEND_CHAT: 2,
   MODIFY_INFO: 3,
-  DISCONNECTION: 4
+  DISCONNECTION: 4,
+  REQUEST_PEER_ID: 5,
+  SEND_PEER_ID: 6
 }
 
 export const emojis = []

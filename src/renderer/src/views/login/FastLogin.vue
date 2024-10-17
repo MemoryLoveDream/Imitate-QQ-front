@@ -14,7 +14,7 @@ async function fastLogin() {
     await window.api.hide('main')
     userStore.currentUser = (await api.getUserInfo(id)).data.data
     await router.replace('/main')
-    await window.api.change_size()
+    await window.api.changeSize()
     await window.api.show('main')
   }
 }

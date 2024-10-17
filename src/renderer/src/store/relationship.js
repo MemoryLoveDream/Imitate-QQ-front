@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { reactive, ref } from 'vue'
-import { useAssetsStore } from './assets'
 import { useUserStore } from './user'
 import { MessageType } from './constants'
 import api from '../services/apis'
@@ -8,7 +7,6 @@ import api from '../services/apis'
 export const useRelationshipStore = defineStore(
   'relationship',
   () => {
-    const assetsStore = useAssetsStore()
     const userStore = useUserStore()
 
     const messageList = ref([])
@@ -23,11 +21,11 @@ export const useRelationshipStore = defineStore(
     const chatHistory = reactive(new Map())
 
     function readJson(name) {
-      return assetsStore.readJson('users', `${userStore.currentUser.id}/${name}`)
+      return userStore.readJson(`${userStore.currentUser.id}${name}`)
     }
 
-    function writeJson(name, data) {
-      assetsStore.writeJson('users', `${userStore.currentUser.id}/${name}`, data.value)
+    function writeJson(name, data, space = '') {
+      window.api.write(`${userStore.currentUser.id}${name}`, JSON.stringify(data, null, space))
     }
 
     function uid(type, id) {

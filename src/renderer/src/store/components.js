@@ -9,6 +9,7 @@ export const useComponentsStore = defineStore('components', () => {
   const tabs = ref()
   const messageBar = ref()
   const chatDetails = ref()
+  const videoCall = ref()
   const personalInformationKey = ref(0)
   const groupInformationKey = ref(0)
 
@@ -37,6 +38,7 @@ export const useComponentsStore = defineStore('components', () => {
     tabs,
     messageBar,
     chatDetails,
+    videoCall,
     personalInformationKey,
     groupInformationKey,
     changeTab,

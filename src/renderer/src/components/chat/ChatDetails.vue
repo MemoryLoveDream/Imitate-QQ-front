@@ -23,16 +23,15 @@ function refresh() {
   scrollToBottom()
 }
 
-function addChat(type, id, chat) {
-  relationshipStore.addChatHistory(type, id, chat)
+async function addChat(type, id, chat) {
+  await relationshipStore.addChatHistory(type, id, chat)
   if (type === relationshipStore.chatterUid[0] && id === relationshipStore.chatterUid[1])
     scrollToBottom()
 }
 
 function sendChat(chat) {
   addChat(...relationshipStore.chatterUid, chat)
-  chat.messageType = relationshipStore.chatterUid[0]
-  chat.receiverId = relationshipStore.chatterUid[1]
+  ;[chat.messageType, chat.receiverId] = relationshipStore.chatterUid
   ws.sendMessage(chat)
 }
 

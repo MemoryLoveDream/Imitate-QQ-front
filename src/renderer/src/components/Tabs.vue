@@ -26,7 +26,7 @@ const tabs = reactive([
     inactive_url: '/src/assets/pic/tabs/video.svg',
     active_url: '/src/assets/pic/tabs/video_active.svg',
     click: () => {
-      window.api.create_child('video', 970, 680, '/short')
+      window.api.createChild('video', 970, 680, '/short')
     }
   },
   {

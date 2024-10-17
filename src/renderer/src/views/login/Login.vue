@@ -19,7 +19,7 @@ async function login() {
   let res = await api.login({ id: select.value.text, password: password.value.text })
   if (res.data.code === 200) {
     await router.replace('/main')
-    window.api.change_size()
+    window.api.changeSize()
     res = await api.getUserInfo(select.value.text)
     userStore.currentUser = res.data.data
     userStore.updateLatestLoginedUser(res.data.data.id, password.value.text)

@@ -10,6 +10,15 @@ export function dateFormat(sendTime, now = dayjs()) {
   let date = dayjs(sendTime)
   let gapDay = now.diff(date, 'day')
   if (gapDay === 0) return date.format('HH:mm')
+  else if (gapDay === 1) return '昨天'
+  else if (gapDay < 7) return Weekdays[date.day() - 1]
+  else return date.format('YYYY/MM/DD')
+}
+
+export function timeFormat(sendTime, now = dayjs()) {
+  let date = dayjs(sendTime)
+  let gapDay = now.diff(date, 'day')
+  if (gapDay === 0) return date.format('HH:mm')
   else if (gapDay === 1) return '昨天' + date.format('HH:mm')
   else if (gapDay < 7) return Weekdays[date.day() - 1] + ' ' + date.format('HH:mm')
   else return date.format('YYYY/MM/DD HH:mm')

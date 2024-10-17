@@ -1,32 +1,40 @@
 import { defineStore } from 'pinia'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 
-export const useAssetsStore = defineStore(
-  'assets',
-  () => {
-    const assetsLocation = ref('E:/project/Vue/easychat-front/assets/')
-    const usersLocation = computed(() => assetsLocation.value + 'users/')
-    const configLocation = computed(() => assetsLocation.value + 'config/')
+export const useAssetsStore = defineStore('assets', () => {
+  const assetsLocation = ref()
+  const config = ref()
+  const usersLocation = ref()
 
-    function toJsonUrl(tag, name) {
-      return assetsLocation.value + tag + '/' + name + '.json'
-    }
+  function initialize() {
+    assetsLocation.value = `${window.api.getProjectPath()}/assets/`
+    config.value = readJson('config')
+    if (config.value.usersLocation === '') usersLocation.value = `${assetsLocation.value}users/`
+  }
 
-    function readJson(tag, name) {
-      return JSON.parse(window.api.read(toJsonUrl(tag, name)))
-    }
+  function toJsonUrl(name) {
+    return `${assetsLocation.value}${name}.json`
+  }
 
-    function writeJson(tag, name, data) {
-      window.api.write(toJsonUrl(tag, name), JSON.stringify(data))
-    }
+  function readJson(name) {
+    return JSON.parse(window.api.read(toJsonUrl(name)))
+  }
 
-    return {
-      assetsLocation,
-      usersLocation,
-      configLocation,
-      readJson,
-      writeJson
-    }
-  },
-  { persist: true }
-)
+  function writeJson(name, data, space = '') {
+    window.api.write(toJsonUrl(name), JSON.stringify(data, null, space))
+  }
+
+  function finalize() {
+    writeJson('config', config.value, '\t')
+  }
+
+  return {
+    assetsLocation,
+    usersLocation,
+    config,
+    initialize,
+    readJson,
+    writeJson,
+    finalize
+  }
+})

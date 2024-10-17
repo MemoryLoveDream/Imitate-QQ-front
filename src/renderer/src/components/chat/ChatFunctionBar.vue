@@ -13,7 +13,10 @@ const icons = reactive([
   {
     name: 'video_call',
     inactive_url: '/src/assets/pic/chat_function_bar/video_call.svg',
-    hover_url: '/src/assets/pic/chat_function_bar/video_call_hover.svg'
+    hover_url: '/src/assets/pic/chat_function_bar/video_call_hover.svg',
+    click: () => {
+      window.api.createChild('video_call', 700, 680, '/video_call')
+    }
   },
   {
     name: 'voice_call',

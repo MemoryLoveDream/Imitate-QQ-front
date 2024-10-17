@@ -6,7 +6,7 @@ const api = {
   quit: (name) => {
     ipcRenderer.invoke('quit', name).then(() => {})
   },
-  change_size: () => {
+  changeSize: () => {
     ipcRenderer.invoke('change_size').then(() => {})
   },
   maximize: (name) => {
@@ -24,7 +24,7 @@ const api = {
   hide: (name) => {
     ipcRenderer.invoke('hide', name).then(() => {})
   },
-  create_child: (name, width, height, router) => {
+  createChild: (name, width, height, router) => {
     ipcRenderer.invoke('create_child', name, width, height, router).then(() => {})
   },
   write: (path, data) => {
@@ -33,8 +33,14 @@ const api = {
   read: (path) => {
     return ipcRenderer.sendSync('read', path)
   },
-  select_file: (options) => {
+  selectFile: (options) => {
     return ipcRenderer.sendSync('select_file', options)
+  },
+  getProjectPath: () => {
+    return ipcRenderer.sendSync('get_project_path')
+  },
+  makeDir: (name) => {
+    return ipcRenderer.sendSync('make_dir', name)
   }
 }
 

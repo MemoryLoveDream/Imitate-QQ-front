@@ -10,7 +10,7 @@ import { ElMessage } from 'element-plus'
 import { useUserStore } from '../../store/user'
 import { useRelationshipStore } from '../../store/relationship'
 import { useRouter } from 'vue-router'
-import { Tab } from '../../store/constants'
+import { Tab } from '../../constants/enums'
 
 const userStore = useUserStore()
 const relationshipStore = useRelationshipStore()

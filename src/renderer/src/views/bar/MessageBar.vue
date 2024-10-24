@@ -1,11 +1,11 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { Plus, Search } from '@element-plus/icons-vue'
-import Message from './Message.vue'
+import Message from '../../components/card/Message.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useComponentsStore } from '../../store/components'
 import { useRelationshipStore } from '../../store/relationship'
-import { MessageType } from '../../store/constants'
+import { MessageType } from '../../constants/enums'
 
 const relationshipStore = useRelationshipStore()
 const componentsStore = useComponentsStore()

@@ -10,13 +10,9 @@ const route = useRoute()
 
 const localCameraVideo = ref()
 const remoteCameraVideo = ref()
-let localMediaStream
-let callerId
-let calleeId
-let peer
-let call
-let peerId
+let localMediaStream, callerId, calleeId, peer, call, peerId
 let anotherPeerId = ''
+const text = ref('')
 
 function getUserMedia(constrains, success) {
   if (window.navigator.mediaDevices.getUserMedia) {
@@ -64,6 +60,7 @@ async function startCaller() {
 }
 
 function startCall() {
+  anotherPeerId = text.value
   call = peer.call(anotherPeerId, localMediaStream)
   call.on('stream', (stream) => {
     remoteCameraVideo.value.srcObject = stream
@@ -106,14 +103,23 @@ onMounted(async () => {
       calleeId = Number(route.params.c2)
     }
   }
-  ws.requestPeerId(callerId, calleeId)
+  // remoteCameraVideo.value.srcObject = localMediaStream
+  // remoteCameraVideo.value.play()
+  // ws.requestPeerId(callerId, calleeId)
+  console.log(localCameraVideo.value.srcObject)
+  console.log(remoteCameraVideo.value.srcObject)
 })
 </script>
 
 <template>
   <div class="video-call">
     <video ref="remoteCameraVideo" class="you"></video>
+<!--    <video ref="remoteCameraVideo" class="you" src="http://192.168.0.104:4747/video"></video>-->
+<!--    <video ref="remoteCameraVideo" class="you" src="E:/铭冥/2023/冬日散步.mp4" autoplay></video>-->
+<!--    <img ref="remoteCameraVideo" class="you" alt="" src="http://192.168.0.104:4747/video" />-->
     <video ref="localCameraVideo" class="i"></video>
+    <el-button circle class="call" color="dodgerblue" @click="startCall">Call</el-button>
+    <input v-model="text" class="input" />
     <div class="drag"></div>
     <WindowButtons name="video_call" />
   </div>
@@ -134,6 +140,24 @@ onMounted(async () => {
   top: 0;
   left: 0;
   background-color: black;
+}
+
+.call {
+  position: absolute;
+  top: 70%;
+  left: 50%;
+  height: 50px;
+  width: 50px;
+  transform: translateX(-50%);
+}
+
+.input {
+  position: absolute;
+  top: 80%;
+  left: 50%;
+  height: 30px;
+  width: 200px;
+  transform: translateX(-50%);
 }
 
 .drag {

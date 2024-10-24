@@ -1,13 +1,10 @@
 <script setup>
 import HoverableIcon from '../base/HoverableIcon.vue'
-import { reactive, ref, watch } from 'vue'
-import { useUserStore } from '../../store/user'
-import { useComponentsStore } from '../../store/components'
+import { ref, watch } from 'vue'
 
-const userStore = useUserStore()
-const componentsStore = useComponentsStore()
+const emit = defineEmits(['handle-send'])
 
-const icons = reactive([
+const icons = [
   {
     name: 'emoji',
     inactive_url: '/src/assets/pic/chat_input/emoji.svg',
@@ -28,17 +25,12 @@ const icons = reactive([
     inactive_url: '/src/assets/pic/chat_input/voice.svg',
     hover_url: '/src/assets/pic/chat_input/voice_hover.svg'
   }
-])
+]
 const text = ref('')
 const disabled = ref(true)
 
-function sendMessage() {
-  componentsStore.sendChat({
-    senderId: userStore.currentUser.id,
-    headUrl: userStore.currentUser.headUrl,
-    chatType: 1,
-    content: text.value
-  })
+function sendChat() {
+  emit('handle-send', text.value)
   text.value = ''
 }
 
@@ -49,12 +41,13 @@ watch(text, (value) => {
 
 <template>
   <div class="chat-input">
+    
     <div class="divider"></div>
     <div class="icons">
       <HoverableIcon v-for="icon in icons" :key="icon.name" class="icon" :urls="icon" />
     </div>
-    <textarea v-model="text" class="text" spellcheck="false" @keyup.enter="sendMessage"></textarea>
-    <el-button class="btn" color="dodgerblue" :disabled="disabled" @click="sendMessage">
+    <textarea v-model="text" class="text" spellcheck="false"></textarea>
+    <el-button class="btn" color="dodgerblue" :disabled="disabled" @click="sendChat">
       发送
     </el-button>
   </div>

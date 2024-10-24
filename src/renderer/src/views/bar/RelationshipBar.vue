@@ -1,11 +1,11 @@
 <script setup>
 import { Plus, Search } from '@element-plus/icons-vue'
 import { onBeforeMount, ref } from 'vue'
-import RelationshipGrouping from './RelationshipGrouping.vue'
+import RelationshipGrouping from '../../components/card/RelationshipGrouping.vue'
 import { useUserStore } from '../../store/user'
 import { useRelationshipStore } from '../../store/relationship'
 import { useComponentsStore } from '../../store/components'
-import { MessageType } from '../../store/constants'
+import { MessageType } from '../../constants/enums'
 import { useRouter } from 'vue-router'
 import api from '../../services/apis'
 

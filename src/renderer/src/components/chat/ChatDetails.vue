@@ -1,15 +1,20 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { ref, watch } from 'vue'
 import Chat from './Chat.vue'
-import { useRelationshipStore } from '../../store/relationship'
-import { useWebSocketStore } from '../../store/webSocket'
 
-const relationshipStore = useRelationshipStore()
-const ws = useWebSocketStore()
-
+const props = defineProps({ history: Object })
 const scrollbar = ref()
 const inner = ref()
 const n = ref(0)
+
+watch(
+  props.history,
+  () => {
+    console.log(props.history)
+    scrollToBottom()
+  },
+  { immediate: true }
+)
 
 function scrollToBottom() {
   setTimeout(() => {
@@ -23,35 +28,14 @@ function refresh() {
   scrollToBottom()
 }
 
-async function addChat(type, id, chat) {
-  await relationshipStore.addChatHistory(type, id, chat)
-  if (type === relationshipStore.chatterUid[0] && id === relationshipStore.chatterUid[1])
-    scrollToBottom()
-}
-
-function sendChat(chat) {
-  addChat(...relationshipStore.chatterUid, chat)
-  ;[chat.messageType, chat.receiverId] = relationshipStore.chatterUid
-  ws.sendMessage(chat)
-}
-
-defineExpose({ addChat, sendChat, refresh })
-
-onMounted(() => {
-  scrollToBottom()
-})
+defineExpose({ refresh })
 </script>
 
 <template>
   <div class="chat-details">
     <el-scrollbar ref="scrollbar">
       <div ref="inner" :key="n">
-        <Chat
-          v-for="(chat1, index) in relationshipStore.history"
-          :key="index"
-          class="row"
-          :chat="chat1"
-        />
+        <Chat v-for="(chat, index) in props.history" :key="index" class="row" :chat="chat" />
       </div>
     </el-scrollbar>
   </div>

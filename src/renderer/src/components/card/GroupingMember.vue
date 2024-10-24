@@ -104,7 +104,7 @@ defineExpose({ setInactive })
 
 .signature {
   position: absolute;
-  bottom: 17px;
+  bottom: 14px;
   left: 60px;
   font-size: 12px;
   color: #888;

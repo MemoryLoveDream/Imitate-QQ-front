@@ -10,7 +10,7 @@ import { useComponentsStore } from '../../store/components'
 import { useRouter } from 'vue-router'
 import api from '../../services/apis'
 import { ElMessage } from 'element-plus'
-import { Tab } from '../../store/constants'
+import { Tab } from '../../constants/enums'
 
 const userStore = useUserStore()
 const relationshipStore = useRelationshipStore()

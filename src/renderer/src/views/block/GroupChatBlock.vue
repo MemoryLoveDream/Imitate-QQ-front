@@ -3,11 +3,32 @@ import WindowButtons from '../../components/base/WindowButtons.vue'
 import ChatFunctionBar from '../../components/chat/ChatFunctionBar.vue'
 import ChatDetails from '../../components/chat/ChatDetails.vue'
 import ChatInput from '../../components/chat/ChatInput.vue'
-import { onMounted, ref } from 'vue'
+import { inject, onMounted, ref } from 'vue'
 import { useComponentsStore } from '../../store/components'
+import { useRelationshipStore } from '../../store/relationship'
+import { useWebSocketStore } from '../../store/webSocket'
 
+const ws = useWebSocketStore()
+const relationshipStore = useRelationshipStore()
 const componentsStore = useComponentsStore()
 const chatDetails = ref()
+const userId = inject('userId')
+const userHeadUrl = inject('userHeadUrl')
+
+function sendChat(chat) {
+  relationshipStore.addChatHistory(...relationshipStore.chatterUid, chat)
+  ;[chat.messageType, chat.receiverId] = relationshipStore.chatterUid
+  ws.sendMessage(chat)
+}
+
+function handleSend(text) {
+  sendChat({
+    senderId: userId.value,
+    headUrl: userHeadUrl.value,
+    chatType: 1,
+    content: text
+  })
+}
 
 onMounted(() => {
   componentsStore.chatDetails = chatDetails.value
@@ -16,9 +37,9 @@ onMounted(() => {
 
 <template>
   <div class="message-block">
-    <ChatFunctionBar />
-    <ChatDetails ref="chatDetails" />
-    <ChatInput />
+    <ChatFunctionBar :chatter="relationshipStore.chatter" />
+    <ChatDetails ref="chatDetails" :history="relationshipStore.history" />
+    <ChatInput @handle-send="handleSend" />
     <WindowButtons />
   </div>
 </template>

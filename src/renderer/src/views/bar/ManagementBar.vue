@@ -1,8 +1,8 @@
 <script setup>
-import Tabs from '../components/Tabs.vue'
+import Tabs from '../../components/Tabs.vue'
 import { onMounted, ref } from 'vue'
-import { useUserStore } from '../store/user'
-import { useComponentsStore } from '../store/components'
+import { useUserStore } from '../../store/user'
+import { useComponentsStore } from '../../store/components'
 
 const userStore = useUserStore()
 const componentsStore = useComponentsStore()

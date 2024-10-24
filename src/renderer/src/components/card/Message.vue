@@ -8,7 +8,7 @@ const emit = defineEmits(['after-select'])
 const message_class = ref('message')
 const nickname_class = ref('nickname')
 const date_class = ref('date')
-const latest_message_class = ref('latest_message')
+const content_class = ref('content')
 const status = ref('inactive')
 const unread = ref(props.message.unread)
 
@@ -17,18 +17,18 @@ watch(status, (value) => {
     message_class.value = 'message_active'
     nickname_class.value = 'nickname_active'
     date_class.value = 'date_active'
-    latest_message_class.value = 'latest_message_active'
+    content_class.value = 'content_active'
     unread.value = 0
   } else if (value === 'hover') {
     message_class.value = 'message_hover'
     nickname_class.value = 'nickname'
     date_class.value = 'date'
-    latest_message_class.value = 'latest_message'
+    content_class.value = 'content'
   } else {
     message_class.value = 'message'
     nickname_class.value = 'nickname'
     date_class.value = 'date'
-    latest_message_class.value = 'latest_message'
+    content_class.value = 'content'
   }
 })
 
@@ -43,7 +43,7 @@ function mouseOut() {
 function setIsActive(status1) {
   status.value = status1
   if (status1 === 'active')
-    emit('after-select', props.n, props.message.messageType, props.message.senderId)
+    emit('after-select', props.n, props.message.messageType, props.message.id)
 }
 
 defineExpose({ setIsActive })
@@ -58,11 +58,11 @@ defineExpose({ setIsActive })
       @click="setIsActive('active')"
     >
       <el-avatar class="head" :size="40" :src="props.message.headUrl" />
-      <div id="nickname_id" :class="nickname_class">
+      <div :class="nickname_class">
         {{ props.message.nickname }}
       </div>
-      <div id="date_id" :class="date_class">{{ dateFormat(props.message?.sendTime) }}</div>
-      <div id="latest_message_id" :class="latest_message_class">
+      <div :class="date_class">{{ dateFormat(props.message?.sendTime) }}</div>
+      <div :class="content_class">
         {{ props.message?.content }}
       </div>
     </div>
@@ -120,19 +120,20 @@ defineExpose({ setIsActive })
   color: white;
 }
 
-.latest_message {
+.content {
   position: absolute;
-  bottom: 17px;
+  bottom: 14px;
   left: 60px;
   font-size: 12px;
   color: #888;
+  max-width: 80%;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
 }
 
-.latest_message_active {
-  .latest_message();
+.content_active {
+  .content();
   color: white;
 }
 </style>

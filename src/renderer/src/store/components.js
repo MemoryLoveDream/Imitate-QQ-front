@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { useRelationshipStore } from './relationship'
-import { MessageType } from './constants'
+import { MessageType } from '../constants/enums'
 
 export const useComponentsStore = defineStore('components', () => {
   const relationshipStore = useRelationshipStore()

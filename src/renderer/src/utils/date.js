@@ -7,6 +7,7 @@ export function now() {
 }
 
 export function dateFormat(sendTime, now = dayjs()) {
+  if (sendTime === '') return ''
   let date = dayjs(sendTime)
   let gapDay = now.diff(date, 'day')
   if (gapDay === 0) return date.format('HH:mm')
@@ -16,6 +17,7 @@ export function dateFormat(sendTime, now = dayjs()) {
 }
 
 export function timeFormat(sendTime, now = dayjs()) {
+  if (sendTime === '') return ''
   let date = dayjs(sendTime)
   let gapDay = now.diff(date, 'day')
   if (gapDay === 0) return date.format('HH:mm')

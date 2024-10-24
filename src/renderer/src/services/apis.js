@@ -12,5 +12,6 @@ export default {
   getPersonalGrouping: (id) => request.get(`/relationship/personal_grouping/${id}`),
   updatePersonalNote: (data) => request.post('/relationship/update_note', data),
   updatePersonalGrouping: (data) => request.post('/relationship/update_grouping', data),
-  getLatestMessages: (id) => request.post(`/message/latest_messages/${id}`)
+  getLatestMessages: (id) => request.post(`/message/latest_messages/${id}`),
+  getNewMessages: (id) => request.post(`/message/new_messages/${id}`)
 }

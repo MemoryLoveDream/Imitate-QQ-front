@@ -39,42 +39,42 @@ const router = createRouter({
             {
               path: 'message_null',
               components: {
-                first: () => import('../components/message/MessageBar.vue'),
+                first: () => import('../views/bar/MessageBar.vue'),
                 second: () => import('../views/block/NoneBlock.vue')
               }
             },
             {
               path: 'message_person/:index',
               components: {
-                first: () => import('../components/message/MessageBar.vue'),
+                first: () => import('../views/bar/MessageBar.vue'),
                 second: () => import('../views/block/PersonalChatBlock.vue')
               }
             },
             {
               path: 'message_group/:index',
               components: {
-                first: () => import('../components/message/MessageBar.vue'),
+                first: () => import('../views/bar/MessageBar.vue'),
                 second: () => import('../views/block/GroupChatBlock.vue')
               }
             },
             {
               path: 'relationship_null',
               components: {
-                first: () => import('../components/relationship/RelationshipBar.vue'),
+                first: () => import('../views/bar/RelationshipBar.vue'),
                 second: () => import('../views/block/NoneBlock.vue')
               }
             },
             {
               path: 'relationship_person',
               components: {
-                first: () => import('../components/relationship/RelationshipBar.vue'),
+                first: () => import('../views/bar/RelationshipBar.vue'),
                 second: () => import('../views/block/PersonalInformation.vue')
               }
             },
             {
               path: 'relationship_group',
               components: {
-                first: () => import('../components/relationship/RelationshipBar.vue'),
+                first: () => import('../views/bar/RelationshipBar.vue'),
                 second: () => import('../views/block/GroupInformation.vue')
               }
             }

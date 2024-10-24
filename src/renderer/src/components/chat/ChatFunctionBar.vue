@@ -1,12 +1,9 @@
 <script setup>
 import HoverableIcon from '../base/HoverableIcon.vue'
-import { reactive } from 'vue'
-import { useRelationshipStore } from '../../store/relationship'
-import { useUserStore } from '../../store/user'
+import { inject } from 'vue'
 
-const userStore = useUserStore()
-const relationshipStore = useRelationshipStore()
-const icons = reactive([
+const props = defineProps({ chatter: Object })
+const icons = [
   {
     name: 'more',
     inactive_url: '/src/assets/pic/chat_function_bar/more.svg',
@@ -21,7 +18,7 @@ const icons = reactive([
         'video_call',
         700,
         680,
-        `/video_call/${userStore.currentUser.id}/${relationshipStore.chatter.id}`
+        `/video_call/${inject('userId').value}/${props.chatter.id}`
       )
     }
   },
@@ -30,13 +27,13 @@ const icons = reactive([
     inactive_url: '/src/assets/pic/chat_function_bar/voice_call.svg',
     hover_url: '/src/assets/pic/chat_function_bar/voice_call_hover.svg'
   }
-])
+]
 </script>
 
 <template>
   <div class="chat-function-bar">
     <div class="nickname">
-      {{ relationshipStore.chatter.name ?? relationshipStore.chatter.nickname }}
+      {{ props.chatter.name ?? props.chatter.nickname }}
     </div>
     <div class="icons">
       <HoverableIcon v-for="icon in icons" :key="icon.name" class="icon" :urls="icon" />

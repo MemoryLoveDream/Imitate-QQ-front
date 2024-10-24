@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { useUserStore } from './user'
-import { useComponentsStore } from './components'
-import { SignalType } from './constants'
+import { SignalType } from '../constants/enums'
+import { useRelationshipStore } from './relationship'
 
 export const useWebSocketStore = defineStore('ws', () => {
   const userStore = useUserStore()
-  const componentsStore = useComponentsStore()
+  const relationshipStore = useRelationshipStore()
   const ws = ref()
 
   async function webSocketOnMessage(e) {
@@ -15,7 +15,7 @@ export const useWebSocketStore = defineStore('ws', () => {
     if (signal.signalType === SignalType.SEND_CHAT) {
       let chat = JSON.parse(signal.content)
       delete chat.receiverId
-      await componentsStore.addChat(chat.messageType, chat.senderId, chat)
+      await relationshipStore.addChatHistory(chat.messageType, chat.senderId, chat)
     } else if (signal.signalType === SignalType.REQUEST_PEER_ID) {
       let call = JSON.parse(signal.content)
       await window.api.createChild('video_call', 700, 680, `/video_call/called/${call.callerId}`)

@@ -70,53 +70,63 @@ async function afterSelect(code, info) {
 
 onBeforeMount(async () => {
   personalGrouping.value = (await api.getPersonalGrouping(userStore.currentUser.id)).data.data
+
 })
 </script>
 
 <template>
-  <el-input v-model="text" class="input" placeholder="搜索" :prefix-icon="Search"></el-input>
-  <el-button class="plus" color="whitesmoke">
-    <el-icon><Plus /></el-icon>
-  </el-button>
-  <div class="tab">
-    <div class="radio-inputs">
-      <label class="radio" @click="type = 'single'">
-        <input type="radio" name="radio" checked />
-        <span class="name">好友</span>
-      </label>
-      <label class="radio" @click="type = 'group'">
-        <input type="radio" name="radio" />
-        <span class="name">群聊</span>
-      </label>
+  <div class="relationship-bar">
+    <el-input v-model="text" class="input" placeholder="搜索" :prefix-icon="Search"></el-input>
+    <el-button class="plus" color="whitesmoke">
+      <el-icon><Plus /></el-icon>
+    </el-button>
+    <div class="tab">
+      <div class="radio-inputs">
+        <label class="radio" @click="type = 'single'">
+          <input type="radio" name="radio" checked />
+          <span class="name">好友</span>
+        </label>
+        <label class="radio" @click="type = 'group'">
+          <input type="radio" name="radio" />
+          <span class="name">群聊</span>
+        </label>
+      </div>
     </div>
-  </div>
-  <div class="groupings">
-    <div v-show="type === 'single'">
-      <RelationshipGrouping
-        v-for="(grouping, index) in personalGrouping"
-        ref="singleGroupingsRef"
-        :key="index"
-        :code="{ n1: MessageType.PERSON, n2: index }"
-        class="grouping"
-        :grouping="grouping"
-        @after-select="afterSelect"
-      />
-    </div>
-    <div v-show="type === 'group'">
-      <RelationshipGrouping
-        v-for="(grouping, index) in groupGrouping"
-        ref="groupGroupingsRef"
-        :key="index"
-        :code="{ n1: MessageType.GROUP, n2: index }"
-        class="grouping"
-        :grouping="grouping"
-        @after-select="afterSelect"
-      />
+    <div class="groupings">
+      <div v-show="type === 'single'">
+        <RelationshipGrouping
+          v-for="(grouping, index) in personalGrouping"
+          ref="singleGroupingsRef"
+          :key="index"
+          :code="{ n1: MessageType.PERSON, n2: index }"
+          class="grouping"
+          :grouping="grouping"
+          @after-select="afterSelect"
+        />
+      </div>
+      <div v-show="type === 'group'">
+        <RelationshipGrouping
+          v-for="(grouping, index) in groupGrouping"
+          ref="groupGroupingsRef"
+          :key="index"
+          :code="{ n1: MessageType.GROUP, n2: index }"
+          class="grouping"
+          :grouping="grouping"
+          @after-select="afterSelect"
+        />
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped lang="less">
+@import '../../assets/css/base';
+
+.relationship-bar {
+  .container();
+  background-color: white;
+}
+
 .input {
   position: absolute;
   top: 25px;

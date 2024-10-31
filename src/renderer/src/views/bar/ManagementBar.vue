@@ -15,28 +15,41 @@ onMounted(() => {
 
 <template>
   <div class="management-bar">
-    <el-avatar
-      class="avatar"
-      :size="35"
-      :src="userStore.currentUser.headUrl"
-      style="user-select: none"
-    />
-    <Tabs ref="tabs" />
+    <div class="background"></div>
+    <el-avatar class="avatar" :size="35" :src="userStore.currentUser?.headUrl" @dragstart.prevent />
+    <Tabs ref="tabs" class="tabs" />
   </div>
 </template>
 
 <style scoped lang="less">
+@import '../../assets/css/base';
 .management-bar {
   position: absolute;
   width: 65px;
   height: 100%;
-  background-color: #eeeeee;
+  //background-color: #eeeeee;
+  background-color: whitesmoke;
+  opacity: 95%;
+  backdrop-filter: blur(8px);
+  //filter: blur(8px);
+  .user-cannot-select();
+}
+
+.background {
+  .container();
+  background-color: whitesmoke;
+  opacity: 95%;
+  filter: blur(8px);
 }
 
 .avatar {
-  position: absolute;
+  .horizontal-center();
   top: 25px;
-  left: 50%;
-  transform: translateX(-50%);
+}
+
+.tabs {
+  position: absolute;
+  top: 75px;
+  width: 100%;
 }
 </style>

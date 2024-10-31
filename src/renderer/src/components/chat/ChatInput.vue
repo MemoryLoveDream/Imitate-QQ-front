@@ -1,98 +1,84 @@
 <script setup>
-import HoverableIcon from '../base/HoverableIcon.vue'
-import { ref, watch } from 'vue'
+import StatefulButton from '../base/StatefulButton.vue'
+import { onBeforeMount, ref, watch } from 'vue'
+import { chatInputIcons } from '../../constants/assets'
 
 const emit = defineEmits(['handle-send'])
-
-const icons = [
-  {
-    name: 'emoji',
-    inactive_url: '/src/assets/pic/chat_input/emoji.svg',
-    hover_url: '/src/assets/pic/chat_input/emoji_hover.svg'
+const clickFunctions = [
+  (event) => {
+    frameVisible.value = !frameVisible.value
+    console.log(event.clientX)
+    console.log(event.clientY)
+    console.log()
   },
-  {
-    name: 'folder',
-    inactive_url: '/src/assets/pic/chat_input/folder.svg',
-    hover_url: '/src/assets/pic/chat_input/folder_hover.svg'
-  },
-  {
-    name: 'picture',
-    inactive_url: '/src/assets/pic/chat_input/picture.svg',
-    hover_url: '/src/assets/pic/chat_input/picture_hover.svg'
-  },
-  {
-    name: 'voice',
-    inactive_url: '/src/assets/pic/chat_input/voice.svg',
-    hover_url: '/src/assets/pic/chat_input/voice_hover.svg'
-  }
+  () => {},
+  () => {},
+  () => {}
 ]
 const text = ref('')
-const disabled = ref(true)
+const btnClickable = ref(true)
+const frameVisible = ref(false)
+
+watch(text, (value) => {
+  btnClickable.value = value === ''
+})
 
 function sendChat() {
   emit('handle-send', text.value)
   text.value = ''
 }
 
-watch(text, (value) => {
-  disabled.value = value === ''
+onBeforeMount(() => {
+  chatInputIcons.forEach((icon, index) => {
+    icon.click = clickFunctions[index]
+  })
 })
 </script>
 
 <template>
   <div class="chat-input">
-    
-    <div class="divider"></div>
-    <div class="icons">
-      <HoverableIcon v-for="icon in icons" :key="icon.name" class="icon" :urls="icon" />
-    </div>
+    <StatefulButton
+      v-for="(icon, index) in chatInputIcons"
+      :key="index"
+      class="icon"
+      :urls="icon"
+      tip
+      hover-effect="icon"
+    />
     <textarea v-model="text" class="text" spellcheck="false"></textarea>
-    <el-button class="btn" color="dodgerblue" :disabled="disabled" @click="sendChat">
+    <el-button class="btn" color="dodgerblue" :disabled="btnClickable" @click="sendChat">
       发送
     </el-button>
+    <div v-show="frameVisible" class="frame">
+      <el-scrollbar>
+        <div class="emojis"></div>
+      </el-scrollbar>
+    </div>
   </div>
 </template>
 
 <style scoped lang="less">
+@import '../../assets/css/base';
+
 .chat-input {
-  position: absolute;
-  top: calc(100% - 200px);
-  height: 200px;
-  width: 100%;
-  background-color: transparent;
-}
+  display: flex;
+  justify-content: start;
 
-.divider {
-  position: absolute;
-  top: 0;
-  width: 100%;
-  height: 1px;
-  background-color: #eeeeee;
-}
-
-.icons {
-  position: absolute;
-  top: 10px;
-  right: 0;
-  padding-left: 10px;
-  height: 20px;
-  width: 100%;
-  background-color: transparent;
-}
-
-.icon {
-  position: relative;
-  left: 5px;
-  top: 50%;
-  transform: translateY(-50%);
-  padding-right: 15px;
+  .icon {
+    position: relative;
+    width: 35px;
+    height: 35px;
+    top: 0;
+    left: 0;
+    margin: 5px;
+  }
 }
 
 .text {
   position: absolute;
-  top: 40px;
   width: 100%;
   height: 100px;
+  top: 40px;
   padding-left: 15px;
   padding-right: 15px;
   background-color: transparent;
@@ -107,5 +93,26 @@ watch(text, (value) => {
   bottom: 20px;
   right: 20px;
   width: 100px;
+}
+
+.frame {
+  position: fixed;
+  width: 400px;
+  height: 300px;
+  bottom: 200px;
+  left: 400px;
+  border-radius: 5px;
+  box-shadow: 3px 3px 20px 2px #aaa;
+  overflow: hidden;
+  //overflow: scroll;
+  //scrollbar-width: none;
+  //scrollbar-color: transparent #aaa;
+
+  .emojis {
+    position: absolute;
+    width: 100%;
+    height: 400px;
+    background-color: pink;
+  }
 }
 </style>

@@ -11,11 +11,12 @@ const { nickname, headUrl } = userStore.loginedUsers.get(id)
 
 async function fastLogin() {
   if ((await api.login({ id: id, password: password })).data.code === 200) {
-    await window.api.hide('main')
-    userStore.currentUser = (await api.getUserInfo(id)).data.data
-    await router.replace('/main')
-    await window.api.changeSize()
-    await window.api.show('main')
+    window.api.createWindow('main', 970, 680, `/main?id=${id}`, {
+      transparent: true,
+      minWidth: 395,
+      minHeight: 550
+    })
+    window.api.close('login')
   }
 }
 
@@ -25,8 +26,7 @@ function change(url) {
 </script>
 
 <template>
-  <div class="background">
-    <CloseButton />
+  <div class="fast-login">
     <div class="logo">逛逛</div>
     <el-avatar class="head" :size="100" :src="headUrl" />
     <div class="nickname">{{ nickname }}</div>
@@ -34,11 +34,12 @@ function change(url) {
     <div class="add_account" @click="change('/login')">切换账号</div>
     <div class="divider">|</div>
     <div class="exit_account" @click="change('/register')">注册账号</div>
+    <CloseButton control="login" />
   </div>
 </template>
 
 <style scoped lang="less">
-.background {
+.fast-login {
   position: absolute;
   top: 0;
   left: 0;
@@ -46,7 +47,6 @@ function change(url) {
   height: 100%;
   user-select: none;
   background-color: aliceblue;
-  //-webkit-app-region: drag;
 }
 
 .logo {

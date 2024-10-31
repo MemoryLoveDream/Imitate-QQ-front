@@ -16,11 +16,13 @@ const password = ref()
 async function register() {
   let res = await api.register({ nickname: input.value.text, password: password.value.text })
   if (res.data.code === 200) {
-    await router.replace('/main')
-    window.api.changeSize()
-    userStore.currentUser.id = res.data.data
-    userStore.currentUser.nickname = input.value.text
     userStore.updateLatestLoginedUser(res.data.data, password.value.text)
+    window.api.createWindow('main', 970, 680, `/main?id=${res.data.data}`, {
+      transparent: true,
+      minWidth: 395,
+      minHeight: 550
+    })
+    window.api.close('login')
   }
 }
 
@@ -53,7 +55,6 @@ function change_head() {
 
 <template>
   <div class="background">
-    <CloseButton />
     <el-avatar class="head" :size="80" :src="headUrl" @click="change_head" />
     <FunctionalInput class="input" placeholder="输入昵称">
       <CloseBold />
@@ -63,6 +64,7 @@ function change_head() {
     </FunctionalInput>
     <el-button class="register" color="dodgerblue" @click="register">注册</el-button>
     <div class="login" @click="change('/login')">已有账号</div>
+    <CloseButton control="login" />
   </div>
 </template>
 

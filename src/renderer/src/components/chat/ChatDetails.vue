@@ -10,7 +10,6 @@ const n = ref(0)
 watch(
   props.history,
   () => {
-    console.log(props.history)
     scrollToBottom()
   },
   { immediate: true }

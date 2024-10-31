@@ -1,5 +1,4 @@
 <script setup>
-import WindowButtons from '../../components/base/WindowButtons.vue'
 import ChatFunctionBar from '../../components/chat/ChatFunctionBar.vue'
 import ChatDetails from '../../components/chat/ChatDetails.vue'
 import ChatInput from '../../components/chat/ChatInput.vue'
@@ -10,22 +9,21 @@ import { useWebSocketStore } from '../../store/webSocket'
 import { now } from '../../utils/date'
 
 const ws = useWebSocketStore()
-const relationshipStore = useRelationshipStore()
+const rs = useRelationshipStore()
 const componentsStore = useComponentsStore()
 const chatDetails = ref()
 const userId = inject('userId')
-const userHeadUrl = inject('userHeadUrl')
 
 function sendChat(chat) {
-  relationshipStore.addChatHistory(...relationshipStore.chatterUid, chat)
-  ;[chat.messageType, chat.receiverId] = relationshipStore.chatterUid
+  rs.addChat(rs.chatter.type, rs.chatter.id, chat)
+  chat.messageType = rs.chatter.type
+  chat.receiverId = rs.chatter.id
   ws.sendMessage(chat)
 }
 
 function handleSend(text) {
   sendChat({
     senderId: userId.value,
-    // headUrl: userHeadUrl.value,
     sendTime: now(),
     chatType: 1,
     content: text
@@ -39,20 +37,58 @@ onMounted(() => {
 
 <template>
   <div class="message-block">
-    <ChatFunctionBar :chatter="relationshipStore.chatter" />
-    <ChatDetails ref="chatDetails" :history="relationshipStore.history" />
-    <ChatInput @handle-send="handleSend" />
-    <WindowButtons />
+    <ChatFunctionBar class="chat-function-bar" :chatter="rs.chatter.info" />
+    <div class="divider1"></div>
+    <ChatDetails ref="chatDetails" class="chat-details" :history="rs.chatter.history.details" />
+    <div class="divider2"></div>
+    <ChatInput class="chat-input" @handle-send="handleSend" />
   </div>
 </template>
 
 <style scoped lang="less">
+@import '../../assets/css/base';
+
 .message-block {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  .container();
+  .user-cannot-select();
   background-color: whitesmoke;
+}
+
+.chat-function-bar {
+  position: absolute;
+  width: 100%;
+  height: 70px;
+  .user-cannot-select();
+}
+
+.divider {
+  position: absolute;
+  width: 100%;
+  height: 1px;
+  background-color: #eeeeee;
+}
+
+.divider1 {
+  .divider();
+  top: 70px;
+}
+
+.chat-details {
+  position: absolute;
+  top: 70px;
+  height: calc(100% - 270px);
+  width: 100%;
+}
+
+.divider2 {
+  .divider();
+  top: calc(100% - 201px);
+}
+
+.chat-input {
+  position: absolute;
+  bottom: 0;
+  height: 200px;
+  width: 100%;
 }
 </style>

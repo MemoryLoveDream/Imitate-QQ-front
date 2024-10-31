@@ -44,25 +44,34 @@ onMounted(() => {
 })
 </script>
 
-<template class="container">
-  <el-input v-model="text" class="input" placeholder="搜索" :prefix-icon="Search"></el-input>
-  <el-button class="plus" color="whitesmoke">
-    <el-icon><Plus /></el-icon>
-  </el-button>
-  <div class="messages">
-    <Message
-      v-for="(message, index) in relationshipStore.messageList"
-      ref="messagesRef"
-      :key="index"
-      :n="index"
-      :message="message"
-      class="message"
-      @after-select="afterSelect"
-    />
+<template>
+  <div class="message-bar">
+    <el-input v-model="text" class="input" placeholder="搜索" :prefix-icon="Search"></el-input>
+    <el-button class="plus" color="whitesmoke">
+      <el-icon><Plus /></el-icon>
+    </el-button>
+    <div class="messages">
+      <Message
+        v-for="(message, index) in relationshipStore.messageList"
+        ref="messagesRef"
+        :key="index"
+        :n="index"
+        :message="message"
+        class="message"
+        @after-select="afterSelect"
+      />
+    </div>
   </div>
 </template>
 
 <style scoped lang="less">
+@import '../../assets/css/base';
+
+.message-bar {
+  .container();
+  background-color: white;
+}
+
 .input {
   position: absolute;
   top: 25px;

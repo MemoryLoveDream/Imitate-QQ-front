@@ -6,75 +6,61 @@ import fs from 'fs'
 import { dialog } from 'electron'
 
 const path = require('path')
-let mainWindow
-const map = new Map()
-
+const windowMap = new Map()
 let peerId = ''
 
-function createWindow() {
-  mainWindow = new BrowserWindow({
-    width: 330,
-    height: 450,
+const consoleShortcutKeys = ['A', 'Q', 'W', 'E', 'R', 'T']
+const keySet = new Set()
+function getKey() {
+  for (let key of consoleShortcutKeys) {
+    if (!keySet.has(key)) {
+      keySet.add(key)
+      return key
+    }
+  }
+}
+
+function createWindow(name, width, height, router, others = {}) {
+  let newWindow = new BrowserWindow({
+    width: width,
+    height: height,
     show: false,
+    minWidth: others.minWidth === undefined ? 0 : others.minWidth,
+    minHeight: others.minHeight === undefined ? true : others.minHeight,
+    resizable: others.resizable === undefined ? true : others.resizable,
+    transparent: others.transparent === undefined ? false : others.transparent,
     autoHideMenuBar: true,
     titleBarStyle: 'hidden',
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false,
-      // webSecurity: false
-    }
-  })
-
-  mainWindow.on('ready-to-show', () => {
-    globalShortcut.register('CommandOrControl+Q', () => {
-      mainWindow.webContents.openDevTools()
-    })
-    mainWindow.show()
-  })
-
-  mainWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url).then()
-    return { action: 'deny' }
-  })
-
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']).then()
-  } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html')).then()
-  }
-}
-
-const createChildWindow = (name, width1, height1, router) => {
-  let childWindow = new BrowserWindow({
-    modal: true,
-    width: width1,
-    height: height1,
-    autoHideMenuBar: true,
-    titleBarStyle: 'hidden',
-    webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
       sandbox: false
     }
   })
-
-  map.set(name, childWindow)
-
-  childWindow.on('ready-to-show', () => {
-    globalShortcut.register('CommandOrControl+W', () => {
-      childWindow.webContents.openDevTools()
+  let key = getKey()
+  newWindow.on('ready-to-show', () => {
+    globalShortcut.register(`CommandOrControl+${key}`, () => {
+      newWindow.webContents.openDevTools()
     })
-    childWindow.show()
+    windowMap.set(name, newWindow)
+    newWindow.show()
+  })
+  newWindow.on('closed', () => {
+    windowMap.delete(name)
+    newWindow = null
+    keySet.delete(key)
+    globalShortcut.unregister(`CommandOrControl+${key}`)
   })
 
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    childWindow.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#' + router).then()
-  } else {
-    childWindow.loadFile(join(__dirname, '../renderer/index.html')).then()
-  }
-  childWindow.on('closed', () => {
-    childWindow = null
+  newWindow.webContents.setWindowOpenHandler((details) => {
+    shell.openExternal(details.url).then()
+    return { action: 'deny' }
   })
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    newWindow.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#' + router).then()
+  } else {
+    newWindow.loadFile(join(__dirname, '../renderer/index.html')).then()
+  }
 }
 
 app.whenReady().then(() => {
@@ -86,9 +72,10 @@ app.whenReady().then(() => {
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
-  createWindow()
-  app.on('activate', function () {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+  createWindow('login', 330, 450, '/fast_login', { resizable: false })
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0)
+      createWindow('login', 330, 450, '/fast_login', { resizable: false })
   })
 })
 
@@ -99,60 +86,48 @@ app.on('window-all-closed', () => {
 })
 
 //对外接口
-ipcMain.handle('change_size', () => {
-  mainWindow.setSize(970, 680)
-  mainWindow.center()
-})
-
+// ipcMain.handle('change_size', () => {
+//   mainWindow.setSize(970, 680)
+//   mainWindow.center()
+// })
+//窗口处理
 ipcMain.handle('maximize', (event, name) => {
-  if (name === 'main') {
-    mainWindow.maximize()
-  } else map.get(name).maximize()
+  windowMap.get(name).maximize()
 })
 
 ipcMain.handle('unmaximize', (event, name) => {
-  if (name === 'main') {
-    mainWindow.unmaximize()
-  } else map.get(name).unmaximize()
+  windowMap.get(name).unmaximize()
 })
 
 ipcMain.handle('minimize', (event, name) => {
-  if (name === 'main') {
-    mainWindow.minimize()
-  } else map.get(name).minimize()
+  windowMap.get(name).minimize()
 })
 
 ipcMain.handle('show', (event, name) => {
-  if (name === 'main') {
-    mainWindow.show()
-  } else map.get(name).show()
+  windowMap.get(name).show()
 })
 
 ipcMain.handle('hide', (event, name) => {
-  if (name === 'main') {
-    mainWindow.hide()
-  } else map.get(name).hide()
+  windowMap.get(name).hide()
 })
 
-ipcMain.handle('quit', (event, name) => {
-  if (name === 'main') {
-    mainWindow.close()
-  } else map.get(name).close()
+ipcMain.handle('close', (event, name) => {
+  windowMap.get(name).close()
 })
 
-ipcMain.handle('create_child', (event, name, width, height, router) => {
-  createChildWindow(name, width, height, router)
+ipcMain.handle('create_window', (event, name, width, height, router, others) => {
+  createWindow(name, width, height, router, others)
 })
-
+//文件处理
 ipcMain.handle('write', (event, path, data) => {
-  fs.writeFile(path, data, (err) => {
-    if (err) throw err
+  fs.writeFile(path, data, (error) => {
+    if (error) throw error
   })
 })
 
 ipcMain.on('read', (event, path) => {
   if (fs.existsSync(path)) event.returnValue = fs.readFileSync(path, 'utf8')
-  else event.returnValue = '[]'
+  else event.returnValue = '{}'
 })
 
 ipcMain.on('select_file', (event, options) => {
@@ -166,11 +141,7 @@ ipcMain.on('get_project_path', (event) => {
 ipcMain.on('make_dir', (event, name) => {
   fs.mkdirSync(name)
 })
-
-ipcMain.on('get_project_path', (event) => {
-  event.returnValue = process.env['INIT_CWD']
-})
-
+//其它处理
 ipcMain.on('set_peer_id', (event, id) => {
   peerId = id
 })

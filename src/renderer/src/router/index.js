@@ -9,6 +9,10 @@ const router = createRouter({
       redirect: '/fast_login'
     },
     {
+      path: '/test',
+      component: () => import('../components/Test.vue')
+    },
+    {
       path: '/fast_login',
       component: () => import('../views/login/FastLogin.vue')
     },

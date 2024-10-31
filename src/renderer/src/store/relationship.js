@@ -19,15 +19,12 @@ export const useRelationshipStore = defineStore(
     //Chat
     //{senderId,headUrl,sendTime,messageType,chatType,content}
     const messageList = ref([])
-    const messages = reactive(new Set())
-    const chatterUid = ref([0, 0])
-    const infoUid = ref([0, 0])
-    const personalGroupingTypes = ref(['我'])
-    const chatter = ref()
-    const history = ref()
-    const info = ref()
     const relationships = reactive(new Map())
     const chatHistory = reactive(new Map())
+    const messages = reactive(new Set())
+    const chatter = ref({ type: null, id: null, info: null, history: null })
+    const displayer = ref({ type: null, id: null, info: null })
+    const personalGroupingTypes = ref(['我'])
 
     function readJson(name) {
       return userStore.readJson(`${userStore.currentUser.id}/${name}`)
@@ -46,16 +43,16 @@ export const useRelationshipStore = defineStore(
     }
 
     async function changeChatterUid(type, id) {
-      chatterUid.value[0] = type
-      chatterUid.value[1] = id
-      chatter.value = await getInfo(type, id)
-      history.value = await getChatHistory(type, id)
+      chatter.value.type = type
+      chatter.value.id = id
+      chatter.value.info = await getInfo(type, id)
+      chatter.value.history = await getChatHistory(type, id)
     }
 
     async function changeInfoUid(type, id) {
-      infoUid.value[0] = type
-      infoUid.value[1] = id
-      info.value = await getInfo(type, id)
+      displayer.value.type = type
+      displayer.value.id = id
+      displayer.value.info = await getInfo(type, id)
     }
 
     async function initialize() {
@@ -63,18 +60,24 @@ export const useRelationshipStore = defineStore(
       let newMessages = (await api.getNewMessages(userStore.currentUser.id)).data.data
       newMessages.forEach((item) => messages.add(uid1(item)))
       let temp = [].concat(newMessages)
-      readJson('message_list').forEach((item) => {
-        if (!messages.has(uid1(item))) {
-          messages.add(uid1(item))
-          temp.push(item)
-        }
-      })
+      let oldMessages = readJson('message_list')
+      if (Array.isArray(oldMessages)) {
+        oldMessages.forEach((item) => {
+          if (!messages.has(uid1(item))) {
+            messages.add(uid1(item))
+            temp.push(item)
+          }
+        })
+      }
       for (let item of temp) {
         await getInfo(item.messageType, item.id)
         await getChatHistory(item.messageType, item.id)
         messageList.value.push(createMessage(item.messageType, item.id))
       }
-      newMessages.forEach((item) => chatHistory.get(uid1(item)).push(...item.chats))
+      newMessages.forEach((item) => {
+        chatHistory.get(uid1(item)).unread += item.unread
+        chatHistory.get(uid1(item)).details.push(...item.chats)
+      })
 
       personalGroupingTypes.value = (
         await api.getPersonalGroupingTypes(userStore.currentUser.id)
@@ -97,22 +100,29 @@ export const useRelationshipStore = defineStore(
           : note
       })
       message.sendTime = computed(() => {
-        let history = chatHistory.get(uuid)
-        return history.length === 0 ? '' : history[history.length - 1].sendTime
+        let details = chatHistory.get(uuid).details
+        return details.length === 0 ? '' : details[details.length - 1].sendTime
       })
       message.chatType = computed(() => {
-        let history = chatHistory.get(uuid)
-        return history.length === 0 ? '' : history[history.length - 1].chatType
+        let details = chatHistory.get(uuid).details
+        return details.length === 0 ? '' : details[details.length - 1].chatType
       })
       message.content = computed(() => {
-        let history = chatHistory.get(uuid)
+        let details = chatHistory.get(uuid).details
         return message.chatType.value === ChatType.PICTURE
           ? '[图片]'
-          : history.length === 0
+          : details.length === 0
             ? ''
-            : history[history.length - 1].content
+            : details[details.length - 1].content
       })
-      message.unread = 0
+      message.unread = computed({
+        get() {
+          return chatHistory.get(uuid).unread
+        },
+        set(value) {
+          chatHistory.get(uuid).unread = value
+        }
+      })
       return message
     }
 
@@ -151,24 +161,30 @@ export const useRelationshipStore = defineStore(
       let uuid = uid(type, id)
       if (!chatHistory.has(uuid)) {
         let chats = readJson(uuid)
-        if (Object.keys(chats).length !== 0) {
-          for (let chat of chats) {
+        if (Object.keys(chats).length === 0) chats = { unread: 0, details: [] }
+        else {
+          let details = chats.details
+          let newDetails = []
+          for (let chat of details) {
             await getInfo(type, id)
-            let src = ['a', 'b', 'c', 'd']
+            let newChat = {}
             for (let i = 0; i < 4; i++) {
-              chat[['senderId', 'sendTime', 'chatType', 'content'][i]] = chat[src[i]]
-              delete chat[src[i]]
+              newChat[['senderId', 'sendTime', 'chatType', 'content'][i]] = chat[i]
             }
-            chat.senderId = chat.senderId === 1 ? userStore.currentUser.id : id
-            chat.headUrl = relationships.get(uid(MessageType.PERSON, chat.senderId)).headUrl
+            newChat.senderId = newChat.senderId === 1 ? userStore.currentUser.id : id
+            newDetails.push(newChat)
           }
+          chats.details = newDetails
         }
-        return chatHistory.set(uuid, chats).get(uuid)
-      } else return chatHistory.get(uuid)
+        chatHistory.set(uuid, chats)
+      }
+      return chatHistory.get(uuid)
     }
 
-    async function addChatHistory(type, id, chat) {
-      ;(await getChatHistory(type, id)).push(chat)
+    async function addChat(type, id, chat) {
+      let history = await getChatHistory(type, id)
+      if (chatter.value.type !== type || chatter.value.id !== id) history.unread += 1
+      history.details.push(chat)
     }
 
     function getHeadUrl(id) {
@@ -182,11 +198,8 @@ export const useRelationshipStore = defineStore(
     return {
       messageList,
       personalGroupingTypes,
-      chatterUid,
-      infoUid,
       chatter,
-      history,
-      info,
+      displayer,
       relationships,
       chatHistory,
       uid,
@@ -196,7 +209,7 @@ export const useRelationshipStore = defineStore(
       finalize,
       addMessage,
       getInfo,
-      addChatHistory,
+      addChat,
       getChatHistory,
       getHeadUrl
     }

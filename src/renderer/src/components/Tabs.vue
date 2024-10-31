@@ -1,94 +1,70 @@
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
-import ActivatableIcon from './base/ActivatableIcon.vue'
+import StatefulButton from './base/StatefulButton.vue'
+import { onBeforeMount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { tabIcons } from '../constants/assets'
 
 const router = useRouter()
-const tabs = reactive([
-  {
-    name: '消息',
-    inactive_url: '/src/assets/pic/tabs/message.svg',
-    active_url: '/src/assets/pic/tabs/message_active.svg',
-    click: () => {
-      router.replace('/main/two/message_null')
-    }
+const clickFunctions = [
+  () => {
+    router.replace('/main/two/message_null')
   },
-  {
-    name: '关系',
-    inactive_url: '/src/assets/pic/tabs/relationship.svg',
-    active_url: '/src/assets/pic/tabs/relationship_active.svg',
-    click: () => {
-      router.replace('/main/two/relationship_null')
-    }
+  () => {
+    router.replace('/main/two/relationship_null')
   },
-  {
-    name: '视频',
-    inactive_url: '/src/assets/pic/tabs/video.svg',
-    active_url: '/src/assets/pic/tabs/video_active.svg',
-    click: () => {
-      window.api.createChild('video', 970, 680, '/short')
-    }
+  () => {
+    window.api.createWindow('video', 970, 680, '/short')
   },
-  {
-    name: '社区',
-    inactive_url: '/src/assets/pic/tabs/community.svg',
-    active_url: '/src/assets/pic/tabs/community_active.svg',
-    click: () => {}
-  },
-  {
-    name: '探索',
-    inactive_url: '/src/assets/pic/tabs/explore.svg',
-    active_url: '/src/assets/pic/tabs/explore_active.svg',
-    click: () => {}
-  }
-])
+  () => {},
+  () => {}
+]
+
 const tabsRef = ref([])
 const selected = ref(0)
 
-function afterSelect(index) {
+function afterClick(index) {
   if (selected.value !== index) {
-    tabsRef.value[selected.value].setIsActive('inactive')
+    tabsRef.value[selected.value].setIsActive(false)
     selected.value = index
   }
 }
 
 function changeTab(index) {
-  tabsRef.value[index].setIsActive('active')
-  afterSelect(index)
+  tabsRef.value[index].setIsActive(true)
+  afterClick(index)
 }
 
 defineExpose({ changeTab })
 
+onBeforeMount(() => {
+  tabIcons.forEach((icon, index) => {
+    icon.click = clickFunctions[index]
+  })
+})
+
 onMounted(() => {
-  tabsRef.value[0].setIsActive('active')
+  tabsRef.value[0].setIsActive(true)
 })
 </script>
 
 <template>
   <div class="tabs">
-    <ActivatableIcon
-      v-for="(tab, index) in tabs"
-      ref="tabsRef"
+    <StatefulButton
+      v-for="(tab, index) in tabIcons"
       :key="index"
-      :n="index"
-      :urls="tab"
-      hoverable
-      tip
+      ref="tabsRef"
       class="tab"
-      @after-select="afterSelect"
+      :index="index"
+      :urls="tab"
+      tip
+      tip-place="right"
+      hover-effect="background"
+      @after-click="afterClick"
     />
   </div>
 </template>
 
 <style scoped lang="less">
-.tabs {
-  position: absolute;
-  top: 75px;
-  left: 50%;
-  transform: translateX(-50%);
-  user-select: none;
-}
-
 .tab {
   position: relative;
   left: 50%;

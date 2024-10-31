@@ -1,33 +1,27 @@
 <script setup>
-import HoverableIcon from '../base/HoverableIcon.vue'
-import { inject } from 'vue'
+import { inject, onBeforeMount } from 'vue'
+import StatefulButton from '../base/StatefulButton.vue'
+import { chatFunctionBarIcons } from '../../constants/assets'
 
 const props = defineProps({ chatter: Object })
-const icons = [
-  {
-    name: 'more',
-    inactive_url: '/src/assets/pic/chat_function_bar/more.svg',
-    hover_url: '/src/assets/pic/chat_function_bar/more_hover.svg'
+const clickFunctions = [
+  () => {},
+  () => {
+    window.api.createWindow(
+      'video_call',
+      700,
+      680,
+      `/video_call/${inject('userId').value}/${props.chatter.id}`
+    )
   },
-  {
-    name: 'video_call',
-    inactive_url: '/src/assets/pic/chat_function_bar/video_call.svg',
-    hover_url: '/src/assets/pic/chat_function_bar/video_call_hover.svg',
-    click: () => {
-      window.api.createChild(
-        'video_call',
-        700,
-        680,
-        `/video_call/${inject('userId').value}/${props.chatter.id}`
-      )
-    }
-  },
-  {
-    name: 'voice_call',
-    inactive_url: '/src/assets/pic/chat_function_bar/voice_call.svg',
-    hover_url: '/src/assets/pic/chat_function_bar/voice_call_hover.svg'
-  }
+  () => {}
 ]
+
+onBeforeMount(() => {
+  chatFunctionBarIcons.forEach((icon, index) => {
+    icon.click = clickFunctions[index]
+  })
+})
 </script>
 
 <template>
@@ -35,20 +29,23 @@ const icons = [
     <div class="nickname">
       {{ props.chatter.name ?? props.chatter.nickname }}
     </div>
-    <div class="icons">
-      <HoverableIcon v-for="icon in icons" :key="icon.name" class="icon" :urls="icon" />
-    </div>
-    <div class="divider"></div>
+    <StatefulButton
+      v-for="(icon, index) in chatFunctionBarIcons"
+      :key="index"
+      class="icon"
+      :urls="icon"
+      tip
+      hover-effect="icon"
+    />
   </div>
 </template>
 
 <style scoped lang="less">
+@import '../../assets/css/base';
+
 .chat-function-bar {
-  position: absolute;
-  height: 70px;
-  width: 100%;
-  background-color: transparent;
-  user-select: none;
+  display: flex;
+  justify-content: end;
 }
 
 .nickname {
@@ -59,29 +56,10 @@ const icons = [
   color: black;
 }
 
-.icons {
-  position: absolute;
-  top: 30px;
-  right: 0;
-  height: 30px;
-  width: 50%;
-  background-color: transparent;
-}
-
 .icon {
   position: relative;
-  float: right;
-  right: 5px;
-  top: 50%;
-  transform: translateY(-50%);
-  padding-right: 15px;
-}
-
-.divider {
-  position: absolute;
-  top: 69px;
-  width: 100%;
-  height: 1px;
-  background-color: #eeeeee;
+  width: 40px;
+  height: 40px;
+  top: 30px;
 }
 </style>

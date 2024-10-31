@@ -18,11 +18,13 @@ const password = ref()
 async function login() {
   let res = await api.login({ id: select.value.text, password: password.value.text })
   if (res.data.code === 200) {
-    await router.replace('/main')
-    window.api.changeSize()
-    res = await api.getUserInfo(select.value.text)
-    userStore.currentUser = res.data.data
     userStore.updateLatestLoginedUser(res.data.data.id, password.value.text)
+    window.api.createWindow('main', 970, 680, `/main?id=${select.value.text}`, {
+      transparent: true,
+      minWidth: 395,
+      minHeight: 550
+    })
+    window.api.close('login')
   } else ElMessage({ type: 'warning', message: '账号或密码错误' })
 }
 
@@ -43,7 +45,6 @@ function deleteItem(id) {
 
 <template>
   <div class="background">
-    <CloseButton />
     <el-avatar class="head" :size="80" :src="headUrl" />
     <SelectInput
       ref="select"
@@ -58,6 +59,7 @@ function deleteItem(id) {
     </FunctionalInput>
     <el-button class="login" color="dodgerblue" @click="login">登录</el-button>
     <div class="register" @click="change('/register')">注册账号</div>
+    <CloseButton control="login" />
   </div>
 </template>
 

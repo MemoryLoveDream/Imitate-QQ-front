@@ -3,7 +3,6 @@ import { ref } from 'vue'
 import IconText from '../../components/base/IconText.vue'
 import ClickInput from '../../components/input/ClickInput.vue'
 import CircularChart from '../../components/data/CircularChart.vue'
-import WindowButtons from '../../components/base/WindowButtons.vue'
 import { useComponentsStore } from '../../store/components'
 import api from '../../services/apis'
 import { ElMessage } from 'element-plus'
@@ -12,9 +11,10 @@ import { useRelationshipStore } from '../../store/relationship'
 import { useRouter } from 'vue-router'
 import { Tab } from '../../constants/enums'
 
-const userStore = useUserStore()
-const relationshipStore = useRelationshipStore()
+const us = useUserStore()
+const rs = useRelationshipStore()
 const componentsStore = useComponentsStore()
+
 const router = useRouter()
 const dataset = ref([
   {
@@ -59,20 +59,20 @@ const dataset = ref([
 ])
 
 async function afterFocusout1(text) {
-  relationshipStore.info.note = text
+  rs.displayer.info.note = text
   let res = await api.updateGroupNote({
-    i: userStore.currentUser.id,
-    you: relationshipStore.info.id,
+    i: us.currentUser.id,
+    you: rs.displayer.info.id,
     newValue: text
   })
   if (res.data.data === false) ElMessage({ type: 'error', message: '网络连接出错！' })
 }
 
 async function afterFocusout2(text) {
-  relationshipStore.info.nickname = text
+  rs.displayer.info.nickname = text
   let res = await api.updateGroupNickname({
-    i: userStore.currentUser.id,
-    you: relationshipStore.info.id,
+    i: us.currentUser.id,
+    you: rs.displayer.info.id,
     newValue: text
   })
   if (res.data.data === false) ElMessage({ type: 'error', message: '网络连接出错！' })
@@ -80,9 +80,10 @@ async function afterFocusout2(text) {
 
 async function click() {
   componentsStore.changeTab(Tab.MESSAGE)
-  await relationshipStore.changeChatterUid(...relationshipStore.infoUid)
+  await rs.changeChatterUid(rs.displayer.type, rs.displayer.id)
   await router.replace(
-    `/main/two/message_group/${await relationshipStore.addMessage(...relationshipStore.infoUid)}`
+    `/main/two/message_group/
+    ${await rs.addMessage(rs.displayer.type, rs.displayer.id)}`
   )
 }
 </script>
@@ -91,16 +92,16 @@ async function click() {
   <div class="group-information">
     <div :key="componentsStore.groupInformationKey" class="card">
       <div class="header">
-        <el-avatar class="head" :src="relationshipStore.info.headUrl" :size="100" />
-        <div class="name">{{ relationshipStore.info.name }}</div>
-        <div class="id">id {{ relationshipStore.info.id }}</div>
+        <el-avatar class="head" :src="rs.displayer.info.headUrl" :size="100" />
+        <div class="name">{{ rs.displayer.info.name }}</div>
+        <div class="id">id {{ rs.displayer.info.id }}</div>
       </div>
       <div class="divider"></div>
       <div class="line1">
         <IconText class="note" url="/src/assets/pic/info/note.svg" text="备注" />
         <ClickInput
           class="note-input"
-          :text="relationshipStore.info.note"
+          :text="rs.displayer.info.note"
           placeholder="设置群备注"
           @after-focusout="afterFocusout1"
         />
@@ -114,7 +115,7 @@ async function click() {
         />
         <ClickInput
           class="nickname-input"
-          :text="relationshipStore.info.nickname"
+          :text="rs.displayer.info.nickname"
           placeholder="编辑群昵称"
           @after-focusout="afterFocusout2"
         />
@@ -141,15 +142,15 @@ async function click() {
         <IconText
           class="members"
           url="/src/assets/pic/info/grouping.svg"
-          :text="`群成员(${relationshipStore.info.number}人)`"
+          :text="`群成员(${rs.displayer.info.number}人)`"
           :size="[20, 120, 10]"
         />
         <div class="members-head">
-          <el-avatar class="leader-url" :src="relationshipStore.info.leaderHeadUrl" :size="30" />
+          <el-avatar class="leader-url" :src="rs.displayer.info.leaderHeadUrl" :size="30" />
           <div class="fence"></div>
           <div class="member-urls">
             <el-avatar
-              v-for="(member_url, index) in relationshipStore.info.memberHeadUrls"
+              v-for="(member_url, index) in rs.displayer.info.memberHeadUrls"
               :key="index"
               :src="member_url"
               :size="30"
@@ -182,27 +183,22 @@ async function click() {
         <el-button class="btn" color="#0099ff" @click="click">发消息</el-button>
       </div>
     </div>
-    <WindowButtons />
   </div>
 </template>
 
 <style scoped lang="less">
+@import '../../assets/css/base';
+
 .group-information {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  .container();
+  background-color: white;
 }
 
 .card {
-  position: absolute;
+  .center();
   height: 600px;
   width: 500px;
-  user-select: none;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  .user-cannot-select();
 }
 
 .header {
@@ -233,19 +229,11 @@ async function click() {
 }
 
 .divider {
-  position: absolute;
+  .vertical-center();
   width: 95%;
   height: 1px;
   top: 120px;
-  left: 50%;
-  transform: translateX(-50%);
   background-color: #eeeeee;
-}
-
-.center {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
 }
 
 .line1 {
@@ -254,12 +242,12 @@ async function click() {
   width: 100%;
 
   .note {
-    .center();
+    .vertical-center();
     left: 10px;
   }
 
   .note-input {
-    .center();
+    .vertical-center();
     right: 30px;
     height: 20px;
     width: 40%;
@@ -272,12 +260,12 @@ async function click() {
   width: 100%;
 
   .nickname {
-    .center();
+    .vertical-center();
     left: 10px;
   }
 
   .nickname-input {
-    .center();
+    .vertical-center();
     right: 30px;
     height: 20px;
     width: 40%;
@@ -290,18 +278,16 @@ async function click() {
   width: 100%;
 
   .introduction {
-    .center();
+    .vertical-center();
     left: 10px;
   }
 
   .introduction-text {
-    .center();
+    .vertical-center();
     right: 30px;
     max-width: 70%;
     color: black;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
+    .text-ellipsis();
   }
 }
 
@@ -311,18 +297,16 @@ async function click() {
   width: 100%;
 
   .announcement {
-    .center();
+    .vertical-center();
     left: 10px;
   }
 
   .announcement-text {
-    .center();
+    .vertical-center();
     right: 30px;
     max-width: 70%;
     color: black;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
+    .text-ellipsis();
   }
 }
 
@@ -332,7 +316,7 @@ async function click() {
   width: 100%;
 
   .members {
-    .center();
+    .vertical-center();
     left: 10px;
   }
 
@@ -344,11 +328,11 @@ async function click() {
     width: 90%;
 
     .leader-url {
-      .center();
+      .vertical-center();
     }
 
     .fence {
-      .center();
+      .vertical-center();
       width: 1px;
       height: 20px;
       left: 40px;
@@ -356,7 +340,7 @@ async function click() {
     }
 
     .member-urls {
-      .center();
+      .vertical-center();
       left: 50px;
 
       .member-url {
@@ -373,7 +357,7 @@ async function click() {
   width: 100%;
 
   .proportion {
-    .center();
+    .vertical-center();
     left: 10px;
   }
 

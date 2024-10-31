@@ -120,8 +120,7 @@ onMounted(async () => {
     <video ref="localCameraVideo" class="i"></video>
     <el-button circle class="call" color="dodgerblue" @click="startCall">Call</el-button>
     <input v-model="text" class="input" />
-    <div class="drag"></div>
-    <WindowButtons name="video_call" />
+    <WindowButtons control="video_call" />
   </div>
 </template>
 
@@ -158,13 +157,5 @@ onMounted(async () => {
   height: 30px;
   width: 200px;
   transform: translateX(-50%);
-}
-
-.drag {
-  position: absolute;
-  height: 20px;
-  width: 80%;
-  background-color: transparent;
-  -webkit-app-region: drag;
 }
 </style>

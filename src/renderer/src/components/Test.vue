@@ -11,7 +11,17 @@ defineExpose({ hello, sayHello })
 </script>
 
 <template>
-  <div class="l">Hello World!</div>
+  <div class="test"></div>
 </template>
 
-<style scoped></style>
+<style scoped lang="less">
+@import '../assets/css/base';
+
+.test {
+  .container();
+  border: 1px solid black;
+  border-radius: 5px;
+  //box-shadow: 1px 1px 10px grey;
+  background-color: white;
+}
+</style>

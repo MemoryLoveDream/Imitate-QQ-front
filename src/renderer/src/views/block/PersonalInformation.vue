@@ -1,43 +1,36 @@
 <script setup>
-import { ref } from 'vue'
-import ActivatableIcon from '../../components/base/ActivatableIcon.vue'
+import StatefulButton from '../../components/base/StatefulButton.vue'
 import IconText from '../../components/base/IconText.vue'
 import ClickInput from '../../components/input/ClickInput.vue'
-import WindowButtons from '../../components/base/WindowButtons.vue'
-import { useUserStore } from '../../store/user'
 import { useRelationshipStore } from '../../store/relationship'
 import { useComponentsStore } from '../../store/components'
 import { useRouter } from 'vue-router'
 import api from '../../services/apis'
 import { ElMessage } from 'element-plus'
 import { Tab } from '../../constants/enums'
+import { thumbsUpIcon } from '../../constants/assets'
+import { useUserStore } from '../../store/user'
 
-const userStore = useUserStore()
-const relationshipStore = useRelationshipStore()
+const us = useUserStore()
+const rs = useRelationshipStore()
 const componentsStore = useComponentsStore()
 const router = useRouter()
-const urls = ref({
-  name: 'PersonalInformation',
-  inactive_url: '/src/assets/pic/info/thumbs_up.svg',
-  active_url: '/src/assets/pic/info/thumbs_up_active.svg',
-  click: () => {}
-})
 
 async function afterFocusout(text) {
-  relationshipStore.info.note = text
+  rs.displayer.info.note = text
   let res = await api.updatePersonalNote({
-    i: userStore.currentUser.id,
-    you: relationshipStore.info.id,
+    i: us.currentUser.id,
+    you: rs.displayer.info.id,
     newValue: text
   })
   if (res.data.data === false) ElMessage({ type: 'error', message: '网络连接出错！' })
 }
 
 async function change(value) {
-  relationshipStore.info.grouping = value
+  rs.displayer.info.grouping = value
   let res = await api.updatePersonalGrouping({
-    i: userStore.currentUser.id,
-    you: relationshipStore.info.id,
+    i: us.currentUser.id,
+    you: rs.displayer.info.id,
     newValue: value
   })
   if (res.data.data === false) ElMessage({ type: 'error', message: '网络连接出错！' })
@@ -45,31 +38,31 @@ async function change(value) {
 
 async function click() {
   componentsStore.changeTab(Tab.MESSAGE)
-  await relationshipStore.changeChatterUid(...relationshipStore.infoUid)
+  await rs.changeChatterUid(rs.displayer.type, rs.displayer.id)
   await router.replace(
-    `/main/two/message_person/${await relationshipStore.addMessage(...relationshipStore.infoUid)}`
+    `/main/two/message_person/${await rs.addMessage(rs.displayer.type, rs.displayer.id)}`
   )
 }
 </script>
 
 <template>
-  <div class="personal-relationship.relationshipStore.relationshipStore.information">
+  <div class="personal-information">
     <div :key="componentsStore.personalInformationKey" class="card">
       <div class="header">
-        <el-avatar class="head" :src="relationshipStore.info.headUrl" :size="100" />
-        <div class="nickname">{{ relationshipStore.info.nickname }}</div>
-        <div class="id">id {{ relationshipStore.info.id }}</div>
+        <el-avatar class="head" :src="rs.displayer.info.headUrl" :size="100" @dragstart.prevent />
+        <div class="nickname">{{ rs.displayer.info.nickname }}</div>
+        <div class="id">id {{ rs.displayer.info.id }}</div>
         <IconText
           class="status"
           :url="
-            relationshipStore.info.status === 1
+            rs.displayer.info.status === 1
               ? '/src/assets/pic/info/online.svg'
               : '/src/assets/pic/info/offline.svg'
           "
-          :text="relationshipStore.info.status === 1 ? '在线' : '离线'"
+          :text="rs.displayer.info.status === 1 ? '在线' : '离线'"
           :size="[35, 80, -5]"
         />
-        <ActivatableIcon class="thumbs-up" :urls="urls" />
+        <StatefulButton class="thumbs-up" :urls="thumbsUpIcon" />
       </div>
       <div class="divider1"></div>
       <div class="line1">
@@ -77,7 +70,7 @@ async function click() {
         <ClickInput
           class="note-input"
           placeholder="设置好友备注"
-          :text="relationshipStore.info.note"
+          :text="rs.displayer.info.note"
           @after-focusout="afterFocusout"
         />
       </div>
@@ -88,13 +81,9 @@ async function click() {
           text="好友分组"
           :size="[20, 120, 10]"
         />
-        <el-select
-          v-model="relationshipStore.info.grouping"
-          class="grouping-select"
-          @change="change"
-        >
+        <el-select v-model="rs.displayer.info.grouping" class="grouping-select" @change="change">
           <el-option
-            v-for="item in relationshipStore.personalGroupingTypes"
+            v-for="item in rs.displayer.personalGroupingTypes"
             :key="item"
             :label="item"
             :value="item"
@@ -108,7 +97,7 @@ async function click() {
           text="签名"
           :size="[20, 120, 10]"
         />
-        <div class="signature-text">{{ relationshipStore.info.signature }}</div>
+        <div class="signature-text">{{ rs.displayer.info.signature }}</div>
       </div>
       <div class="divider2"></div>
       <div class="line4">
@@ -117,17 +106,15 @@ async function click() {
         <el-button class="btn" color="#0099ff" @click="click">发消息</el-button>
       </div>
     </div>
-    <WindowButtons />
   </div>
 </template>
 
 <style scoped lang="less">
+@import '../../assets/css/base';
+
 .personal-information {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  .container();
+  background-color: white;
 }
 
 .card {

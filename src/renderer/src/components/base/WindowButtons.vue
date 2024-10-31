@@ -3,21 +3,21 @@ import { Minus } from '@element-plus/icons-vue'
 import { ref } from 'vue'
 import CloseButton from './CloseButton.vue'
 
-const props = defineProps({ name: { type: String, default: 'main' } })
+const props = defineProps({ control: { type: String, default: 'main' } })
 const max = ref(false)
 const url = ref('/src/assets/pic/window_buttons/rectangle-small.svg')
 
 function minimize() {
-  window.api.minimize(props.name)
+  window.api.minimize(props.control)
 }
 
 function maximize() {
   if (max.value === false) {
-    window.api.maximize(props.name)
+    window.api.maximize(props.control)
     url.value = '/src/assets/pic/window_buttons/copy.svg'
     max.value = true
   } else {
-    window.api.unmaximize(props.name)
+    window.api.unmaximize(props.control)
     url.value = '/src/assets/pic/window_buttons/rectangle-small.svg'
     max.value = false
   }
@@ -26,21 +26,35 @@ function maximize() {
 
 <template>
   <div class="window-buttons">
+    <div class="top-area-drag"></div>
     <div class="minimize" @click="minimize">
       <el-icon class="icon" color="#333">
         <Minus />
       </el-icon>
     </div>
     <div class="maximize" @click="maximize">
-      <img class="svg" :src="url" alt="" />
+      <img class="icon" :src="url" alt="" />
     </div>
-    <CloseButton :name="props.name" />
+    <CloseButton :control="props.control" />
   </div>
 </template>
 
 <style scoped lang="less">
 .window-buttons {
-  -webkit-app-region: no-drag;
+  position: absolute;
+  width: 100%;
+  height: 25px;
+  top: 0;
+}
+
+.drag {
+  position: absolute;
+  width: calc(100% - 96px);
+  height: 25px;
+  top: 0;
+  left: 0;
+  background-color: blue;
+  -webkit-app-region: drag;
 }
 
 .maximize {
@@ -49,7 +63,6 @@ function maximize() {
   right: 32px;
   width: 32px;
   height: 25px;
-  background-color: transparent;
   user-select: none;
   :hover {
     background-color: #eeeeee;
@@ -60,10 +73,7 @@ function maximize() {
   position: absolute;
   width: 100%;
   height: 100%;
-  top: 50%;
-  left: 50%;
   padding: 15%;
-  transform: translate(-50%, -50%);
 }
 
 .minimize {
@@ -72,19 +82,8 @@ function maximize() {
   right: 64px;
   width: 32px;
   height: 25px;
-  background-color: transparent;
   :hover {
     background-color: #eeeeee;
   }
-}
-
-.svg {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 50%;
-  left: 50%;
-  padding: 15%;
-  transform: translate(-50%, -50%);
 }
 </style>

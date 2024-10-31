@@ -8,7 +8,7 @@ onMounted(() => {
 })
 </script>
 
-<template class="container">
+<template>
   <div class="first"><router-view name="first" /></div>
   <div class="divider"></div>
   <div class="second"><router-view name="second" /></div>

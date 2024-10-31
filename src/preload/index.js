@@ -3,12 +3,12 @@ import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
 const api = {
-  quit: (name) => {
-    ipcRenderer.invoke('quit', name).then(() => {})
+  close: (name) => {
+    ipcRenderer.invoke('close', name).then(() => {})
   },
-  changeSize: () => {
-    ipcRenderer.invoke('change_size').then(() => {})
-  },
+  // changeSize: () => {
+  //   ipcRenderer.invoke('change_size').then(() => {})
+  // },
   maximize: (name) => {
     ipcRenderer.invoke('maximize', name).then(() => {})
   },
@@ -24,8 +24,8 @@ const api = {
   hide: (name) => {
     ipcRenderer.invoke('hide', name).then(() => {})
   },
-  createChild: (name, width, height, router) => {
-    ipcRenderer.invoke('create_child', name, width, height, router).then(() => {})
+  createWindow: (name, width, height, router, others) => {
+    ipcRenderer.invoke('create_window', name, width, height, router, others).then(() => {})
   },
   write: (path, data) => {
     ipcRenderer.invoke('write', path, data).then(() => {})

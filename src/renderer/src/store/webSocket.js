@@ -5,9 +5,9 @@ import { SignalType } from '../constants/enums'
 import { useRelationshipStore } from './relationship'
 
 export const useWebSocketStore = defineStore('ws', () => {
+  const ws = ref()
   const userStore = useUserStore()
   const relationshipStore = useRelationshipStore()
-  const ws = ref()
 
   async function webSocketOnMessage(e) {
     let signal = JSON.parse(e.data)
@@ -15,30 +15,14 @@ export const useWebSocketStore = defineStore('ws', () => {
     if (signal.signalType === SignalType.SEND_CHAT) {
       let chat = JSON.parse(signal.content)
       delete chat.receiverId
-      await relationshipStore.addChatHistory(chat.messageType, chat.senderId, chat)
+      await relationshipStore.addChat(chat.messageType, chat.senderId, chat)
     } else if (signal.signalType === SignalType.REQUEST_PEER_ID) {
       let call = JSON.parse(signal.content)
-      await window.api.createChild('video_call', 700, 680, `/video_call/called/${call.callerId}`)
+      await window.api.createWindow('video_call', 700, 680, `/video_call/called/${call.callerId}`)
     } else if (signal.signalType === SignalType.SEND_PEER_ID) {
       let peer = JSON.parse(signal.content)
       window.api.setPeerId(peer.peerId)
     }
-  }
-
-  function initWebSocket() {
-    ws.value = new WebSocket('ws://localhost:8888/ws')
-    ws.value.onmessage = webSocketOnMessage
-    ws.value.onopen = () =>
-      sendSignal({
-        signalType: SignalType.FIRST_CONNECTION,
-        content: `${userStore.currentUser.id}`
-      })
-    ws.value.onerror = () => console.log('后端没开！')
-    ws.value.onclose = () => console.log('断开连接！')
-    window.addEventListener('beforeunload', function () {
-      sendSignal({ signalType: SignalType.DISCONNECTION, content: `${userStore.currentUser.id}` })
-      ws.value.close()
-    })
   }
 
   function anonymousInit() {
@@ -48,11 +32,24 @@ export const useWebSocketStore = defineStore('ws', () => {
     ws.value.onclose = () => console.log('断开连接！')
   }
 
+  function initWebSocket() {
+    anonymousInit()
+    ws.value.onopen = () =>
+      sendSignal({
+        signalType: SignalType.FIRST_CONNECTION,
+        content: `${userStore.currentUser.id}`
+      })
+    window.addEventListener('beforeunload', function () {
+      sendSignal({ signalType: SignalType.DISCONNECTION, content: `${userStore.currentUser.id}` })
+      ws.value.close()
+    })
+  }
+
   function sendSignal(object) {
     ws.value.send(JSON.stringify(object))
   }
 
-  function sendMessage(chat) {
+  function sendChat(chat) {
     sendSignal({ signalType: SignalType.SEND_CHAT, content: JSON.stringify(chat) })
   }
 
@@ -72,10 +69,10 @@ export const useWebSocketStore = defineStore('ws', () => {
 
   return {
     ws,
-    initWebSocket,
     anonymousInit,
+    initWebSocket,
     sendSignal,
-    sendMessage,
+    sendChat,
     requestPeerId,
     sendPeerId
   }

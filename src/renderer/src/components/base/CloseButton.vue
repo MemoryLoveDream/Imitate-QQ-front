@@ -2,24 +2,24 @@
 import { CloseBold } from '@element-plus/icons-vue'
 import { ref } from 'vue'
 
-const props = defineProps({ name: { type: String, default: 'main' } })
+const props = defineProps({ control: { type: String, default: 'main' } })
 const close_color = ref('#333')
 
 function close() {
-  window.api.quit(props.name)
+  window.api.close(props.control)
 }
 
-function mouseOver() {
+function mouseover() {
   close_color.value = 'white'
 }
 
-function mouseOut() {
+function mouseout() {
   close_color.value = '#333'
 }
 </script>
 
 <template>
-  <div class="close" @click="close" @mouseover="mouseOver" @mouseout="mouseOut">
+  <div class="close" @click="close" @mouseover="mouseover" @mouseout="mouseout">
     <el-icon class="icon" :color="close_color">
       <CloseBold />
     </el-icon>
@@ -27,14 +27,14 @@ function mouseOut() {
 </template>
 
 <style scoped lang="less">
+@import '../../assets/css/base';
+
 .close {
   position: absolute;
   top: 0;
   right: 0;
   width: 32px;
   height: 25px;
-  background-color: transparent;
-  border-width: 0;
   :hover {
     background-color: red;
   }
@@ -44,9 +44,6 @@ function mouseOut() {
   position: absolute;
   width: 100%;
   height: 100%;
-  top: 50%;
-  left: 50%;
   padding: 15%;
-  transform: translate(-50%, -50%);
 }
 </style>

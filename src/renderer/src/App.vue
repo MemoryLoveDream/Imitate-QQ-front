@@ -22,13 +22,4 @@ onBeforeMount(() => {
   </el-config-provider>
 </template>
 
-<style lang="less">
-.container {
-  -webkit-app-region: drag;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-</style>
+<style lang="less"></style>

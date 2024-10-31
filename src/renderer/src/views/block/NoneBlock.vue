@@ -1,32 +1,27 @@
 <script setup>
-import WindowButtons from '../../components/base/WindowButtons.vue'
+const url = '/src/assets/pic/background/none.svg'
 </script>
 
 <template>
-  <div class="none-block">
-    <img src="/src/assets/pic/background/none.svg" alt="" draggable="false" />
-    <WindowButtons />
+  <div class="none-block" @dragstart.prevent>
+    <img :src="url" alt="" />
   </div>
 </template>
 
 <style scoped lang="less">
+@import '../../assets/css/base';
+
 .none-block {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  .container();
+  .user-cannot-select();
   background-color: whitesmoke;
-  -webkit-user-select: none;
 }
 
 img {
   position: absolute;
   width: 40%;
   height: auto;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  .center();
   opacity: 0.5;
 }
 </style>

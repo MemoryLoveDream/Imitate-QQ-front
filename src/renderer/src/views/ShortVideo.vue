@@ -4,22 +4,19 @@ import WindowButtons from '../components/base/WindowButtons.vue'
 
 <template>
   <div class="short-video">
-    <div class="header-bar"><WindowButtons name="video" /></div>
+    <WindowButtons control="video" class="window-buttons" />
     <video class="video" src="E:/铭冥/2023/冬日散步.mp4" autoplay></video>
   </div>
 </template>
 
 <style scoped lang="less">
+@import '../assets/css/base';
+
 .short-video {
-  width: 100%;
-  height: 100%;
+  .container();
 }
 
-.header-bar {
-  position: absolute;
-  top: 0;
-  width: 100%;
-  height: 25px;
+.window-buttons {
   background-color: black;
 }
 

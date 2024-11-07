@@ -137,10 +137,7 @@ export const useRelationshipStore = defineStore(
         return 0
       } else
         for (let index in messageList.value)
-          if (
-            messageList.value[index].messageType === type &&
-            messageList.value[index].senderId === id
-          )
+          if (messageList.value[index].messageType === type && messageList.value[index].id === id)
             return index
     }
 

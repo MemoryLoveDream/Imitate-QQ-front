@@ -18,15 +18,16 @@ function sendChat(chat) {
   rs.addChat(rs.chatter.type, rs.chatter.id, chat)
   chat.messageType = rs.chatter.type
   chat.receiverId = rs.chatter.id
-  ws.sendMessage(chat)
+  delete chat.sendTime
+  ws.sendChat(chat)
 }
 
-function handleSend(text) {
+function handleSend(chatType, content) {
   sendChat({
     senderId: userId.value,
     sendTime: now(),
-    chatType: 1,
-    content: text
+    chatType: chatType,
+    content: content
   })
 }
 

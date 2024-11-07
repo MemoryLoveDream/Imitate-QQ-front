@@ -17,12 +17,12 @@ const personalGrouping = ref([])
 const groupGrouping = ref([
   {
     name: '置顶群',
-    number: '0/0',
+    number: '0',
     members: []
   },
   {
     name: '我创建的群',
-    number: '1/1',
+    number: '1',
     members: [
       {
         type: 2,
@@ -34,12 +34,12 @@ const groupGrouping = ref([
   },
   {
     name: '我管理的群',
-    number: '0/0',
+    number: '0',
     members: []
   },
   {
     name: '我加入的群',
-    number: '0/0',
+    number: '0',
     members: []
   }
 ])

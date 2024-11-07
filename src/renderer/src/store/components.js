@@ -30,8 +30,8 @@ export const useComponentsStore = defineStore('components', () => {
   }
 
   function refreshInformationBlock() {
-    if (relationshipStore.infoUid[0] === MessageType.PERSON) personalInformationKey.value++
-    else if (relationshipStore.infoUid[0] === MessageType.GROUP) groupInformationKey.value++
+    if (relationshipStore.displayer.type === MessageType.PERSON) personalInformationKey.value++
+    else if (relationshipStore.displayer.type === MessageType.GROUP) groupInformationKey.value++
   }
 
   return {

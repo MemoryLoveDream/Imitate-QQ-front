@@ -27,11 +27,9 @@ onMounted(() => {
   position: absolute;
   width: 65px;
   height: 100%;
-  //background-color: #eeeeee;
   background-color: whitesmoke;
   opacity: 95%;
   backdrop-filter: blur(8px);
-  //filter: blur(8px);
   .user-cannot-select();
 }
 

@@ -2,6 +2,8 @@
 import StatefulButton from '../base/StatefulButton.vue'
 import { onBeforeMount, ref, watch } from 'vue'
 import { chatInputIcons } from '../../constants/assets'
+import { ChatType } from '../../constants/enums'
+import apis from '../../services/apis'
 
 const emit = defineEmits(['handle-send'])
 const clickFunctions = [
@@ -11,21 +13,38 @@ const clickFunctions = [
     console.log(event.clientY)
     console.log()
   },
-  () => {},
-  () => {},
+  () => {
+    input.value.click()
+  },
+  () => {
+    content.value =
+      'img:///' +
+      window.api.selectFile({
+        filters: [
+          {
+            name: 'Images',
+            extensions: ['jpg', 'png', 'gif', 'jpeg', 'webp', 'avif', 'bmp', 'sharpp', 'apng']
+          }
+        ],
+        properties: ['openFile']
+      })
+    chatType.value = ChatType.PICTURE
+  },
   () => {}
 ]
-const text = ref('')
+const chatType = ref(ChatType.TEXT)
+const content = ref('')
 const btnClickable = ref(true)
 const frameVisible = ref(false)
+const input = ref()
 
-watch(text, (value) => {
+watch(content, (value) => {
   btnClickable.value = value === ''
 })
 
 function sendChat() {
-  emit('handle-send', text.value)
-  text.value = ''
+  emit('handle-send', chatType.value, content.value)
+  content.value = ''
 }
 
 onBeforeMount(() => {
@@ -37,6 +56,7 @@ onBeforeMount(() => {
 
 <template>
   <div class="chat-input">
+    <input id="input" ref="input" class="file" type="file" @change="apis.upload" />
     <StatefulButton
       v-for="(icon, index) in chatInputIcons"
       :key="index"
@@ -45,7 +65,13 @@ onBeforeMount(() => {
       tip
       hover-effect="icon"
     />
-    <textarea v-model="text" class="text" spellcheck="false"></textarea>
+    <textarea
+      v-show="chatType === ChatType.TEXT"
+      v-model="content"
+      class="text"
+      spellcheck="false"
+    />
+    <img v-show="chatType === ChatType.PICTURE" class="pic" alt="" :src="content" />
     <el-button class="btn" color="dodgerblue" :disabled="btnClickable" @click="sendChat">
       发送
     </el-button>
@@ -74,6 +100,12 @@ onBeforeMount(() => {
   }
 }
 
+.file {
+  width: 20px;
+  height: 20px;
+  display: none;
+}
+
 .text {
   position: absolute;
   width: 100%;
@@ -81,11 +113,19 @@ onBeforeMount(() => {
   top: 40px;
   padding-left: 15px;
   padding-right: 15px;
-  background-color: transparent;
   border: none;
   resize: none;
   outline: none;
+  background-color: transparent;
   font-size: 16px;
+}
+
+.pic {
+  position: absolute;
+  width: auto;
+  height: 80px;
+  top: 40px;
+  margin-left: 15px;
 }
 
 .btn {

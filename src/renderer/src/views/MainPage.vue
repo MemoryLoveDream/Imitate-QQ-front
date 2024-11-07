@@ -1,6 +1,6 @@
 <script setup>
 import ManagementBar from './bar/ManagementBar.vue'
-import { computed, onBeforeMount, onMounted, provide } from 'vue'
+import { computed, onBeforeMount, onMounted, provide, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useWebSocketStore } from '../store/webSocket'
 import { useRelationshipStore } from '../store/relationship'
@@ -13,6 +13,7 @@ const userStore = useUserStore()
 const relationshipStore = useRelationshipStore()
 const router = useRouter()
 const route = useRoute()
+const managementBar = ref()
 
 provide(
   'userId',
@@ -41,7 +42,7 @@ onMounted(() => {
 
 <template>
   <div class="main-page">
-    <ManagementBar />
+    <ManagementBar ref="managementBar" />
     <div class="zone"><router-view /></div>
     <WindowButtons class="window-buttons" />
   </div>

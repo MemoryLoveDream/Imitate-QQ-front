@@ -2,53 +2,40 @@
 import { onMounted, ref } from 'vue'
 
 const props = defineProps({
-  url: String,
+  icon: String,
   text: String,
-  size: {
-    type: Array,
-    default() {
-      return [20, 60, 10]
-    }
-  },
+  iconRatio: { type: Number, default: 80 },
+  left: { type: Number, default: 30 },
   textStyle: String
 })
-const container = ref()
+
 const img = ref()
 const content = ref()
 
 onMounted(() => {
-  container.value.style.height = props.size[0] + 'px'
-  container.value.style.width = props.size[1] + 'px'
-  img.value.style.height = props.size[0] + 'px'
-  img.value.style.width = props.size[0] + 'px'
-  content.value.style.left = props.size[0] + props.size[2] + 'px'
+  img.value.style.height = `${props.iconRatio}%`
+  content.value.style.left = `${props.left}px`
 })
 </script>
 
 <template>
-  <div ref="container" class="container">
-    <img ref="img" :src="props.url" alt="" />
+  <div class="container">
+    <img ref="img" :src="props.icon" alt="" />
     <div ref="content" class="text" :style="props.textStyle">{{ props.text }}</div>
   </div>
 </template>
 
 <style scoped lang="less">
-.container {
-  position: absolute;
-}
+@import '../../assets/css/base';
 
 img {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 20px;
-  width: 20px;
+  .vertical-center();
+  height: 80%;
+  width: auto;
 }
 
 .text {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
+  .vertical-center();
   left: 30px;
   color: black;
 }

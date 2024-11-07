@@ -6,6 +6,7 @@ import fs from 'fs'
 import { dialog } from 'electron'
 
 const path = require('path')
+const axios = require('axios')
 const windowMap = new Map()
 let peerId = ''
 
@@ -115,7 +116,7 @@ ipcMain.handle('close', (event, name) => {
   windowMap.get(name).close()
 })
 
-ipcMain.handle('create_window', (event, name, width, height, router, others) => {
+ipcMain.handle('create-window', (event, name, width, height, router, others) => {
   createWindow(name, width, height, router, others)
 })
 //文件处理
@@ -125,27 +126,41 @@ ipcMain.handle('write', (event, path, data) => {
   })
 })
 
+ipcMain.handle('read-file', (event, path) => {
+  return fs.readFileSync(path)
+})
+
 ipcMain.on('read', (event, path) => {
   if (fs.existsSync(path)) event.returnValue = fs.readFileSync(path, 'utf8')
   else event.returnValue = '{}'
 })
 
-ipcMain.on('select_file', (event, options) => {
-  event.returnValue = dialog.showOpenDialogSync(options)
+ipcMain.on('select-file', (event, options) => {
+  event.returnValue = dialog.showOpenDialogSync(windowMap.get('main'), options)
 })
 
-ipcMain.on('get_project_path', (event) => {
+ipcMain.on('get-project-path', (event) => {
   event.returnValue = process.env['INIT_CWD']
 })
 
-ipcMain.on('make_dir', (event, name) => {
+ipcMain.on('make-dir', (event, name) => {
   fs.mkdirSync(name)
 })
+
+ipcMain.handle('download-file', async (event, url, path) => {
+  const writer = fs.createWriteStream(path)
+  const response = await axios({
+    url,
+    method: 'GET',
+    responseType: 'stream'
+  })
+  response.data.pipe(writer)
+})
 //其它处理
-ipcMain.on('set_peer_id', (event, id) => {
+ipcMain.on('set-peer-id', (event, id) => {
   peerId = id
 })
 
-ipcMain.on('get_peer_id', (event) => {
+ipcMain.on('get-peer-id', (event) => {
   event.returnValue = peerId
 })

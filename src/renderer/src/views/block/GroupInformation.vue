@@ -10,6 +10,7 @@ import { useUserStore } from '../../store/user'
 import { useRelationshipStore } from '../../store/relationship'
 import { useRouter } from 'vue-router'
 import { Tab } from '../../constants/enums'
+import { Icon } from "../../constants/assets";
 
 const us = useUserStore()
 const rs = useRelationshipStore()
@@ -97,90 +98,71 @@ async function click() {
         <div class="id">id {{ rs.displayer.info.id }}</div>
       </div>
       <div class="divider"></div>
-      <div class="line1">
-        <IconText class="note" url="/src/assets/pic/info/note.svg" text="备注" />
-        <ClickInput
-          class="note-input"
-          :text="rs.displayer.info.note"
-          placeholder="设置群备注"
-          @after-focusout="afterFocusout1"
-        />
-      </div>
-      <div class="line2">
-        <IconText
-          class="nickname"
-          url="/src/assets/pic/info/person.svg"
-          text="我的本群昵称"
-          :size="[20, 120, 10]"
-        />
-        <ClickInput
-          class="nickname-input"
-          :text="rs.displayer.info.nickname"
-          placeholder="编辑群昵称"
-          @after-focusout="afterFocusout2"
-        />
-      </div>
-      <div class="line3">
-        <IconText
-          class="introduction"
-          url="/src/assets/pic/info/introduction.svg"
-          text="群介绍"
-          :size="[20, 120, 10]"
-        />
-        <div class="introduction-text">群主很懒，还没有群介绍哦~</div>
-      </div>
-      <div class="line4">
-        <IconText
-          class="announcement"
-          url="/src/assets/pic/info/announcement.svg"
-          text="群公告"
-          :size="[20, 120, 10]"
-        />
-        <div class="announcement-text">未设置</div>
-      </div>
-      <div class="line5">
-        <IconText
-          class="members"
-          url="/src/assets/pic/info/grouping.svg"
-          :text="`群成员(${rs.displayer.info.number}人)`"
-          :size="[20, 120, 10]"
-        />
-        <div class="members-head">
-          <el-avatar class="leader-url" :src="rs.displayer.info.leaderHeadUrl" :size="30" />
-          <div class="fence"></div>
-          <div class="member-urls">
-            <el-avatar
-              v-for="(member_url, index) in rs.displayer.info.memberHeadUrls"
-              :key="index"
-              :src="member_url"
-              :size="30"
-              class="member-url"
+      <div class="lines">
+        <div class="line">
+          <IconText class="item" :icon="Icon.NOTE" text="备注" />
+          <ClickInput
+            class="note-input"
+            :text="rs.displayer.info.note"
+            placeholder="设置群备注"
+            @after-focusout="afterFocusout1"
+          />
+        </div>
+        <div class="line">
+          <IconText class="item" :icon="Icon.PERSON" text="我的本群昵称" />
+          <ClickInput
+            class="nickname-input"
+            :text="rs.displayer.info.nickname"
+            placeholder="编辑群昵称"
+            @after-focusout="afterFocusout2"
+          />
+        </div>
+        <div class="line">
+          <IconText class="item" :icon="Icon.INTRODUCTION" text="群介绍" />
+          <div class="introduction-text">群主很懒，还没有群介绍哦~</div>
+        </div>
+        <div class="line">
+          <IconText class="item" :icon="Icon.ANNOUNCEMENT" text="群公告" />
+          <div class="announcement-text">未设置</div>
+        </div>
+        <div class="line5">
+          <IconText
+            class="item"
+            :icon="Icon.GROUPING"
+            :text="`群成员(${rs.displayer.info.number}人)`"
+          />
+          <div class="members-head">
+            <el-avatar class="absolute" :src="rs.displayer.info.leaderHeadUrl" :size="30" />
+            <div class="fence"></div>
+            <div class="member-urls">
+              <el-avatar
+                v-for="(member_url, index) in rs.displayer.info.memberHeadUrls"
+                :key="index"
+                :src="member_url"
+                :size="30"
+                class="member-url"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="line6">
+          <IconText class="item" :icon="Icon.PROPORTION" text="成员分布" />
+          <div class="proportion-charts">
+            <CircularChart
+              v-for="(data, key) in dataset"
+              :key="key"
+              class="relative"
+              :code="data.code"
+              :text="data.text"
+              :color="data.color"
+              :data="data.data"
             />
           </div>
         </div>
-      </div>
-      <div class="line6">
-        <IconText
-          class="proportion"
-          url="/src/assets/pic/info/proportion.svg"
-          text="成员分布"
-          :size="[20, 120, 10]"
-        />
-        <div class="proportion-charts">
-          <CircularChart
-            v-for="(data, key) in dataset"
-            :key="key"
-            class="chart"
-            :code="data.code"
-            :text="data.text"
-            :color="data.color"
-            :data="data.data"
-          />
+        <div class="line7">
+          <el-button class="btn">分享</el-button>
+          <el-button class="btn" color="#0099ff" @click="click">发消息</el-button>
         </div>
-      </div>
-      <div class="line7">
-        <el-button class="btn">分享</el-button>
-        <el-button class="btn" color="#0099ff" @click="click">发消息</el-button>
       </div>
     </div>
   </div>
@@ -229,107 +211,69 @@ async function click() {
 }
 
 .divider {
-  .vertical-center();
+  .horizontal-center();
   width: 95%;
   height: 1px;
   top: 120px;
   background-color: #eeeeee;
 }
 
-.line1 {
+.lines {
   position: absolute;
-  top: 150px;
   width: 100%;
-
-  .note {
-    .vertical-center();
-    left: 10px;
-  }
-
-  .note-input {
-    .vertical-center();
-    right: 30px;
-    height: 20px;
-    width: 40%;
-  }
+  height: 430px;
+  top: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  padding-left: 15px;
+  padding-right: 15px;
 }
 
-.line2 {
-  position: absolute;
-  top: 190px;
-  width: 100%;
-
-  .nickname {
-    .vertical-center();
-    left: 10px;
-  }
-
-  .nickname-input {
-    .vertical-center();
-    right: 30px;
-    height: 20px;
-    width: 40%;
-  }
+.line {
+  position: relative;
+  height: 20px;
 }
 
-.line3 {
-  position: absolute;
-  top: 230px;
-  width: 100%;
-
-  .introduction {
-    .vertical-center();
-    left: 10px;
-  }
-
-  .introduction-text {
-    .vertical-center();
-    right: 30px;
-    max-width: 70%;
-    color: black;
-    .text-ellipsis();
-  }
+.item {
+  width: 120px;
+  height: 20px;
 }
 
-.line4 {
-  position: absolute;
-  top: 270px;
-  width: 100%;
+.note-input {
+  .align-right();
+  height: 20px;
+  width: 40%;
+}
 
-  .announcement {
-    .vertical-center();
-    left: 10px;
-  }
+.nickname-input {
+  .align-right();
+  width: 40%;
+}
 
-  .announcement-text {
-    .vertical-center();
-    right: 30px;
-    max-width: 70%;
-    color: black;
-    .text-ellipsis();
-  }
+.introduction-text {
+  .align-right();
+  max-width: 70%;
+  color: black;
+  .text-ellipsis();
+}
+
+.announcement-text {
+  .align-right();
+  max-width: 70%;
+  color: black;
+  .text-ellipsis();
 }
 
 .line5 {
-  position: absolute;
-  top: 310px;
-  width: 100%;
-
-  .members {
-    .vertical-center();
-    left: 10px;
-  }
+  position: relative;
+  height: 60px;
 
   .members-head {
     position: absolute;
-    top: 20px;
-    left: 10px;
+    top: 30px;
     height: 30px;
-    width: 90%;
-
-    .leader-url {
-      .vertical-center();
-    }
+    width: 100%;
 
     .fence {
       .vertical-center();
@@ -340,7 +284,8 @@ async function click() {
     }
 
     .member-urls {
-      .vertical-center();
+      position: absolute;
+      width: 400px;
       left: 50px;
 
       .member-url {
@@ -352,35 +297,21 @@ async function click() {
 }
 
 .line6 {
-  position: absolute;
-  top: 390px;
-  width: 100%;
-
-  .proportion {
-    .vertical-center();
-    left: 10px;
-  }
+  position: relative;
+  height: 130px;
 
   .proportion-charts {
-    position: absolute;
+    .align-right();
     height: 100px;
-    width: calc(100% - 40px);
-    top: 20px;
-    left: 10px;
-    right: 30px;
+    width: 100%;
+    top: 30px;
     display: flex;
     justify-content: space-between;
-
-    .chart {
-      position: relative;
-    }
   }
 }
 
 .line7 {
-  position: absolute;
-  top: 530px;
-  width: 100%;
+  position: relative;
   display: flex;
   justify-content: center;
 

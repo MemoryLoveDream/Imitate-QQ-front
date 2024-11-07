@@ -52,7 +52,11 @@ function mouseout() {
 }
 
 function click(event) {
-  if (status.value === 'inactive' && props.urls.active_url !== undefined) status.value = 'active'
+  if (
+    (status.value === 'inactive' || status.value === 'hovering') &&
+    props.urls.active_url !== undefined
+  )
+    status.value = 'active'
   else if (status.value === 'active' && props.alterable) status.value = 'inactive'
   props.urls.click?.(event, status.value)
   emit('after-click', props.index)

@@ -27,6 +27,37 @@ const tabIcons = [
   }
 ]
 
+const messageBarIcons = [
+  {
+    text: '置顶',
+    icon: '/src/assets/pic/message_bar/top_up.svg'
+  },
+  {
+    text: '复制QQ号',
+    icon: '/src/assets/pic/message_bar/copy.svg'
+  },
+  {
+    text: '标记未读',
+    icon: '/src/assets/pic/message_bar/message.svg'
+  },
+  {
+    text: '打开独立聊天窗口',
+    icon: '/src/assets/pic/message_bar/independent_window.svg'
+  },
+  {
+    text: '设置免打扰',
+    icon: '/src/assets/pic/message_bar/do_not_disturb.svg'
+  },
+  {
+    text: '从消息列表中移除',
+    icon: '/src/assets/pic/message_bar/delete.svg'
+  },
+  {
+    text: '屏蔽此人消息',
+    icon: '/src/assets/pic/message_bar/shield.svg'
+  }
+]
+
 const chatFunctionBarIcons = [
   {
     name: '语音通话',
@@ -74,4 +105,18 @@ const thumbsUpIcon = {
   active_url: '/src/assets/pic/info/thumbs_up_active.svg'
 }
 
-export { tabIcons, chatFunctionBarIcons, chatInputIcons, thumbsUpIcon }
+const Icon = {
+  ONLINE: '/src/assets/pic/info/online.svg',
+  OFFLINE: '/src/assets/pic/info/offline.svg',
+  MALE: '/src/assets/pic/info/male.svg',
+  FEMALE: '/src/assets/pic/info/female.svg',
+  NOTE: '/src/assets/pic/info/note.svg',
+  GROUPING: '/src/assets/pic/info/grouping.svg',
+  SIGNATURE: '/src/assets/pic/info/signature.svg',
+  PERSON: '/src/assets/pic/info/person.svg',
+  INTRODUCTION: '/src/assets/pic/info/introduction.svg',
+  ANNOUNCEMENT: '/src/assets/pic/info/announcement.svg',
+  PROPORTION: '/src/assets/pic/info/proportion.svg',
+}
+
+export { tabIcons, messageBarIcons, chatFunctionBarIcons, chatInputIcons, thumbsUpIcon, Icon }

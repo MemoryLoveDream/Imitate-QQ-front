@@ -25,28 +25,34 @@ const api = {
     ipcRenderer.invoke('hide', name).then(() => {})
   },
   createWindow: (name, width, height, router, others) => {
-    ipcRenderer.invoke('create_window', name, width, height, router, others).then(() => {})
+    ipcRenderer.invoke('create-window', name, width, height, router, others).then(() => {})
   },
   write: (path, data) => {
     ipcRenderer.invoke('write', path, data).then(() => {})
+  },
+  readFile: (path) => {
+    return ipcRenderer.invoke('read-file', path)
   },
   read: (path) => {
     return ipcRenderer.sendSync('read', path)
   },
   selectFile: (options) => {
-    return ipcRenderer.sendSync('select_file', options)
+    return ipcRenderer.sendSync('select-file', options)
   },
   getProjectPath: () => {
-    return ipcRenderer.sendSync('get_project_path')
+    return ipcRenderer.sendSync('get-project-path')
   },
   makeDir: (name) => {
-    ipcRenderer.sendSync('make_dir', name)
+    ipcRenderer.sendSync('make-dir', name)
+  },
+  downloadFile: (url, path) => {
+    ipcRenderer.invoke('download-file', url, path).then(() => {})
   },
   setPeerId: (id) => {
-    ipcRenderer.sendSync('set_peer_id', id)
+    ipcRenderer.sendSync('set-peer-id', id)
   },
   getPeerId: () => {
-    return ipcRenderer.sendSync('get_peer_id')
+    return ipcRenderer.sendSync('get-peer-id')
   }
 }
 

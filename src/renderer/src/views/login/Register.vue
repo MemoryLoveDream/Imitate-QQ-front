@@ -69,14 +69,11 @@ function change_head() {
 </template>
 
 <style scoped lang="less">
+@import '../../assets/css/base';
+
 .background {
-  //-webkit-app-region: drag;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  user-select: none;
+  .container();
+  .user-cannot-select();
   background-color: aliceblue;
 }
 
@@ -86,7 +83,6 @@ function change_head() {
   right: 0;
   width: 32px;
   height: 25px;
-  background-color: transparent;
   border-width: 0;
   :hover {
     background-color: red;
@@ -94,50 +90,40 @@ function change_head() {
 }
 
 .head {
-  position: absolute;
+  .horizontal-center();
   top: 15%;
-  left: 50%;
-  transform: translateX(-50%);
   background-color: white;
 }
 
-.select {
-  position: absolute;
+.password {
+  .horizontal-center();
   top: 40%;
-  left: 50%;
   width: 250px;
   height: 40px;
-  transform: translateX(-50%);
   text-align: center !important;
   z-index: 10;
 }
 
 .input {
-  position: absolute;
+  .horizontal-center();
   top: 55%;
-  left: 50%;
   width: 250px;
   height: 40px;
-  transform: translateX(-50%);
   z-index: 1;
   //text-align: center !important;
 }
 
 .register {
-  position: absolute;
+  .horizontal-center();
   top: 70%;
-  left: 50%;
   width: 180px;
   height: 37px;
   border-radius: 5px;
-  transform: translateX(-50%);
 }
 
 .login {
-  position: absolute;
+  .horizontal-center();
   top: 90%;
-  left: 50%;
   color: dodgerblue;
-  transform: translateX(-50%);
 }
 </style>

@@ -3,14 +3,13 @@ import { ref, watch } from 'vue'
 import { dateFormat } from '../../utils/date'
 
 const props = defineProps({ n: Number, message: Object })
-const emit = defineEmits(['after-select'])
+const emit = defineEmits(['after-click', 'right-click'])
 
 const message_class = ref('message')
 const nickname_class = ref('nickname')
 const date_class = ref('date')
 const content_class = ref('content')
 const status = ref('inactive')
-const unread = ref(props.message.unread)
 
 watch(status, (value) => {
   if (value === 'active') {
@@ -18,7 +17,6 @@ watch(status, (value) => {
     nickname_class.value = 'nickname_active'
     date_class.value = 'date_active'
     content_class.value = 'content_active'
-    unread.value = 0
   } else if (value === 'hover') {
     message_class.value = 'message_hover'
     nickname_class.value = 'nickname'
@@ -43,19 +41,30 @@ function mouseOut() {
 function setIsActive(status1) {
   status.value = status1
   if (status1 === 'active')
-    emit('after-select', props.n, props.message.messageType, props.message.id)
+    emit('after-click', props.n, props.message.messageType, props.message.id)
+}
+
+function rightClick(event) {
+  emit('right-click', event)
 }
 
 defineExpose({ setIsActive })
 </script>
 
 <template>
-  <el-badge class="message" :value="unread" :max="99" :show-zero="false" :offset="[-20, 50]">
+  <el-badge
+    class="message"
+    :value="props.message.unread"
+    :max="99"
+    :show-zero="false"
+    :offset="[-20, 50]"
+  >
     <div
       :class="message_class"
       @mouseover="mouseOver"
       @mouseout="mouseOut"
       @click="setIsActive('active')"
+      @click.right="rightClick"
     >
       <el-avatar class="head" :size="40" :src="props.message.headUrl" />
       <div :class="nickname_class">

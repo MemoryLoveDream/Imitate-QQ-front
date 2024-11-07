@@ -14,5 +14,19 @@ export default {
   updatePersonalNote: (data) => request.post('/relationship/update_note', data),
   updatePersonalGrouping: (data) => request.post('/relationship/update_grouping', data),
   getLatestMessages: (id) => request.post(`/message/latest_messages/${id}`),
-  getNewMessages: (id) => request.post(`/message/new_messages/${id}`)
+  getNewMessages: (id) => request.post(`/message/new_messages/${id}`),
+  getAssets: (name) => `${request.defaults.baseURL}/assets${name}`,
+  upload: (e) => {
+    let param = new FormData()
+    window.api
+      .readFile('E:/project/Vue/easychat-front/assets/users/1000000000/message_list.json')
+      .then((data) => {
+        console.log(data.buffer)
+        let file = e.target.files[0]
+        // let blob = new Blob([data.buffer], { type: 'application/json' }) //{ type: 'text/plain' })
+        // let file = new File([blob], 'message_list.json')
+        param.append('file', file)
+        return request.post('/assets/upload', param) //{headers: { 'Content-Type': 'multipart/form-data' }}
+      })
+  }
 }

@@ -6,10 +6,10 @@ import { useUserStore } from '../../store/user'
 import { useRelationshipStore } from '../../store/relationship'
 import { useComponentsStore } from '../../store/components'
 import { useRouter } from 'vue-router'
-import api from '../../services/apis'
+import api from '../../services/api'
 import { ElMessage } from 'element-plus'
 import { Tab } from '../../constants/enums'
-import { thumbsUpIcon, Icon } from '../../constants/assets'
+import { StatefulIcon, Icon } from '../../constants/assets'
 
 const us = useUserStore()
 const rs = useRelationshipStore()
@@ -54,16 +54,16 @@ async function click() {
         <div class="id">id {{ rs.displayer.info.id }}</div>
         <IconText
           class="status"
-          :icon="rs.displayer.info.status === 1 ? Icon.ONLINE : Icon.OFFLINE"
+          :icon="rs.displayer.info.status === 1 ? Icon.Online : Icon.Offline"
           :text="rs.displayer.info.status === 1 ? '在线' : '离线'"
         />
-        <StatefulButton class="thumbs-up" :urls="thumbsUpIcon" />
+        <StatefulButton class="thumbs-up" :urls="StatefulIcon.ThumbsUp" />
       </div>
       <div class="divider1"></div>
       <div class="line0">
         <IconText
           class="sex"
-          :icon="rs.displayer.info.sex === 1 ? Icon.MALE : Icon.FEMALE"
+          :icon="rs.displayer.info.sex === 1 ? Icon.Male : Icon.Female"
           :text="rs.displayer.info.sex === 1 ? '男' : '女'"
           :left="20"
         />
@@ -73,7 +73,7 @@ async function click() {
       </div>
       <div class="lines">
         <div class="line">
-          <IconText class="item" :icon="Icon.NOTE" text="备注" />
+          <IconText class="item" :icon="Icon.Note" text="备注" />
           <ClickInput
             class="note-input"
             placeholder="设置好友备注"
@@ -82,7 +82,7 @@ async function click() {
           />
         </div>
         <div class="line2">
-          <IconText class="grouping" :icon="Icon.GROUPING" text="好友分组" />
+          <IconText class="grouping" :icon="Icon.Grouping" text="好友分组" />
           <el-select
             v-model="rs.displayer.info.grouping"
             class="grouping-select"
@@ -97,7 +97,7 @@ async function click() {
           </el-select>
         </div>
         <div class="line">
-          <IconText class="item" :icon="Icon.SIGNATURE" text="签名" />
+          <IconText class="item" :icon="Icon.Signature" text="签名" />
           <div class="signature-text">
             {{ rs.displayer.info.signature === '' ? '暂无签名' : rs.displayer.info.signature }}
           </div>

@@ -42,11 +42,11 @@ const api = {
   getProjectPath: () => {
     return ipcRenderer.sendSync('get-project-path')
   },
-  makeDir: (name) => {
-    ipcRenderer.sendSync('make-dir', name)
+  mkdir: (name) => {
+    ipcRenderer.sendSync('mkdir', name)
   },
-  downloadFile: (url, path) => {
-    ipcRenderer.invoke('download-file', url, path).then(() => {})
+  downloadFile: (request, path) => {
+    ipcRenderer.invoke('download-file', request, path).then(() => {})
   },
   setPeerId: (id) => {
     ipcRenderer.sendSync('set-peer-id', id)

@@ -3,7 +3,7 @@ import { onMounted, ref, watch } from 'vue'
 
 const props = defineProps({
   index: Number,
-  urls: Object,
+  paths: Object,
   ratio: { type: Number, default: 60 },
   tip: Boolean,
   tipPlace: {
@@ -22,24 +22,24 @@ const props = defineProps({
 })
 const emit = defineEmits(['after-click'])
 const status = ref('inactive')
-const url = ref(props.urls.inactive_url)
+const path = ref(props.paths.inactive_path)
 const btn = ref()
 const icon = ref()
 
 watch(status, (value) => {
   if (value === 'inactive') {
-    url.value = props.urls.inactive_url
+    path.value = props.paths.inactive_path
     btn.value.style.backgroundColor = 'transparent'
   } else {
     if (props.hoverEffect === 'background') btn.value.style.backgroundColor = '#e0e0e0'
     if (
       value === 'hovering' &&
       props.hoverEffect === 'icon' &&
-      props.urls.hovering_url !== undefined
+      props.paths.hovering_path !== undefined
     )
-      url.value = props.urls.hovering_url
-    else if (value === 'active' && props.urls.active_url !== undefined)
-      url.value = props.urls.active_url
+      path.value = props.paths.hovering_path
+    else if (value === 'active' && props.paths.active_path !== undefined)
+      path.value = props.paths.active_path
   }
 })
 
@@ -54,11 +54,11 @@ function mouseout() {
 function click(event) {
   if (
     (status.value === 'inactive' || status.value === 'hovering') &&
-    props.urls.active_url !== undefined
+    props.paths.active_path !== undefined
   )
     status.value = 'active'
   else if (status.value === 'active' && props.alterable) status.value = 'inactive'
-  props.urls.click?.(event, status.value)
+  props.paths.click?.(event, status.value)
   emit('after-click', props.index)
 }
 
@@ -78,13 +78,13 @@ onMounted(() => {
   <div ref="btn" class="btn" @mouseover="mouseover" @mouseout="mouseout" @click="click">
     <el-tooltip
       :disabled="!props.tip"
-      :content="props.urls.name"
+      :content="props.paths.name"
       :placement="props.tipPlace"
       effect="light"
       :show-arrow="false"
       :show-after="200"
     >
-      <img ref="icon" alt="" :src="url" />
+      <img ref="icon" alt="" :src="path" />
     </el-tooltip>
   </div>
 </template>

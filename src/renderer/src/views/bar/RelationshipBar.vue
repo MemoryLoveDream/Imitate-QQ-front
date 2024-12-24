@@ -7,11 +7,11 @@ import { useRelationshipStore } from '../../store/relationship'
 import { useComponentsStore } from '../../store/components'
 import { MessageType } from '../../constants/enums'
 import { useRouter } from 'vue-router'
-import api from '../../services/apis'
+import api from '../../services/api'
 
-const userStore = useUserStore()
-const relationshipStore = useRelationshipStore()
-const componentsStore = useComponentsStore()
+const us = useUserStore()
+const rs = useRelationshipStore()
+const cs = useComponentsStore()
 const router = useRouter()
 const personalGrouping = ref([])
 const groupGrouping = ref([
@@ -50,7 +50,7 @@ const groupGroupingsRef = ref([])
 const selected = ref({ n1: -1, n2: -1, n3: -1 })
 
 async function afterSelect(code, info) {
-  await relationshipStore.changeInfoUid(info.type, info.id)
+  await rs.changeInfoUid(info.type, info.id)
   if (
     selected.value.n1 !== code.n1 ||
     selected.value.n2 !== code.n2 ||
@@ -65,11 +65,11 @@ async function afterSelect(code, info) {
   }
   if (info.type === MessageType.PERSON) await router.replace('/main/two/relationship_person')
   else await router.replace('/main/two/relationship_group')
-  componentsStore.refreshInformationBlock()
+  cs.refreshInformationBlock()
 }
 
 onBeforeMount(async () => {
-  personalGrouping.value = (await api.getPersonalGrouping(userStore.currentUser.id)).data.data
+  personalGrouping.value = (await api.listPersonalGrouping(us.currentUser.id)).data.data
 
 })
 </script>

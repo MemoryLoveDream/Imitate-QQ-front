@@ -143,18 +143,12 @@ ipcMain.on('get-project-path', (event) => {
   event.returnValue = process.env['INIT_CWD']
 })
 
-ipcMain.on('make-dir', (event, name) => {
+ipcMain.on('mkdir', (event, name) => {
   fs.mkdirSync(name)
 })
 
-ipcMain.handle('download-file', async (event, url, path) => {
-  const writer = fs.createWriteStream(path)
-  const response = await axios({
-    url,
-    method: 'GET',
-    responseType: 'stream'
-  })
-  response.data.pipe(writer)
+ipcMain.handle('download-file', async (event, request, path) => {
+  ;(await request).data.pipe(fs.createWriteStream(path))
 })
 //其它处理
 ipcMain.on('set-peer-id', (event, id) => {

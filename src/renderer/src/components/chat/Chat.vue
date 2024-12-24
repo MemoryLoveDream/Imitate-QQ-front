@@ -1,9 +1,9 @@
 <script setup>
 import { inject, onMounted, ref } from 'vue'
 import { ChatType } from '../../constants/enums'
+import api from '../../services/api'
 
 const props = defineProps({ chat: Object })
-const getHeadUrl = inject('getHeadUrl')
 
 const head = ref('')
 const text = ref('')
@@ -19,12 +19,13 @@ onMounted(() => {
     text.value = 'text'
     picture.value = 'picture'
   }
+  console.log(props.chat)
 })
 </script>
 
 <template>
   <div class="chat">
-    <el-avatar :class="head" :size="30" :src="getHeadUrl(props.chat.senderId)" />
+    <el-avatar :class="head" :size="30" :src="api.getAvatarPath(1, props.chat.senderId)" />
     <div v-if="props.chat.chatType === ChatType.TEXT" :class="text">{{ props.chat.content }}</div>
     <img
       v-else-if="props.chat.chatType === ChatType.PICTURE"

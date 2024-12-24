@@ -1,45 +1,111 @@
 <script setup>
-import ChatFunctionBar from '../../components/chat/ChatFunctionBar.vue'
-import ChatDetails from '../../components/chat/ChatDetails.vue'
 import ChatInput from '../../components/chat/ChatInput.vue'
-import { inject, onMounted, ref } from 'vue'
+import { inject, onBeforeMount, onMounted, ref, watch } from 'vue'
 import { useComponentsStore } from '../../store/components'
 import { useRelationshipStore } from '../../store/relationship'
 import { useWebSocketStore } from '../../store/webSocket'
 import { now } from '../../utils/date'
+import StatefulButton from '../../components/base/StatefulButton.vue'
+import { StatefulIcon } from '../../constants/assets'
+import Chat from '../../components/chat/Chat.vue'
 
 const ws = useWebSocketStore()
 const rs = useRelationshipStore()
-const componentsStore = useComponentsStore()
+const cs = useComponentsStore()
 const chatDetails = ref()
 const userId = inject('userId')
 
+const clickFunctions = [
+  () => {},
+  () => {
+    window.api.createWindow(
+      'video_call',
+      700,
+      680,
+      `/video_call/${inject('userId').value}/${rs.chatter.id}`
+    )
+  },
+  () => {}
+]
+
 function sendChat(chat) {
-  rs.addChatHistory(rs.chatter.type, rs.chatter.id, chat)
+  rs.addChat(rs.chatter.type, rs.chatter.id, chat)
   chat.messageType = rs.chatter.type
   chat.receiverId = rs.chatter.id
-  ws.sendMessage(chat)
+  delete chat.sendTime
+  ws.sendChat(chat)
 }
 
-function handleSend(text) {
+function handleSend(chatType, content) {
   sendChat({
     senderId: userId.value,
     sendTime: now(),
-    chatType: 1,
-    content: text
+    chatType: chatType,
+    content: content
   })
 }
 
+const scrollbar = ref()
+const inner = ref()
+const n = ref(0)
+
+watch(
+  () => rs.chatter.history,
+  () => {
+    scrollToBottom()
+  },
+  { immediate: true }
+)
+
+function scrollToBottom() {
+  setTimeout(() => {
+    let h = inner.value.clientHeight
+    scrollbar.value.setScrollTop(h)
+  }, 100)
+}
+
+function refresh() {
+  n.value++
+  scrollToBottom()
+}
+
+defineExpose({ refresh })
+
+onBeforeMount(() => {
+  StatefulIcon.ChatFunctionBar.forEach((icon, index) => {
+    icon.click = clickFunctions[index]
+  })
+  console.log(rs.chatter.info)
+})
+
 onMounted(() => {
-  componentsStore.chatDetails = chatDetails.value
+  cs.chatDetails = chatDetails.value
 })
 </script>
 
 <template>
   <div class="message-block">
-    <ChatFunctionBar class="chat-function-bar" :chatter="rs.chatter.info" />
+    <!--    ChatFunctionBar-->
+    <div class="chat-function-bar">
+      <div class="nickname">{{ rs.chatter.info.nickname }}</div>
+      <StatefulButton
+        v-for="(icon, index) in StatefulIcon.ChatFunctionBar"
+        :key="index"
+        class="icon"
+        :paths="icon"
+        tip
+        hover-effect="icon"
+      />
+    </div>
     <div class="divider1"></div>
-    <ChatDetails ref="chatDetails" class="chat-details" :history="rs.chatter.history.details" />
+    <!--    ChatDetails-->
+    <div class="chat-details">
+      <el-scrollbar ref="scrollbar">
+        <div ref="inner" :key="n">
+          <Chat v-for="(chat, index) in rs.chatter.history" :key="index" class="row" :chat="chat" />
+        </div>
+      </el-scrollbar>
+    </div>
     <div class="divider2"></div>
     <ChatInput class="chat-input" @handle-send="handleSend" />
   </div>
@@ -59,6 +125,23 @@ onMounted(() => {
   width: 100%;
   height: 70px;
   .user-cannot-select();
+  display: flex;
+  justify-content: end;
+
+  .nickname {
+    position: absolute;
+    top: 35px;
+    left: 18px;
+    font-size: 16px;
+    color: black;
+  }
+
+  .icon {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    top: 30px;
+  }
 }
 
 .divider {
@@ -78,6 +161,11 @@ onMounted(() => {
   top: 70px;
   height: calc(100% - 270px);
   width: 100%;
+
+  .row {
+    position: relative;
+    width: 100%;
+  }
 }
 
 .divider2 {
@@ -87,8 +175,8 @@ onMounted(() => {
 
 .chat-input {
   position: absolute;
+  bottom: 0;
   height: 200px;
   width: 100%;
-  bottom: 0;
 }
 </style>

@@ -1,9 +1,10 @@
 <script setup>
 import StatefulButton from '../base/StatefulButton.vue'
 import { onBeforeMount, ref, watch } from 'vue'
-import { chatInputIcons } from '../../constants/assets'
+import { StatefulIcon } from '../../constants/assets'
 import { ChatType } from '../../constants/enums'
-import apis from '../../services/apis'
+import apis from '../../services/api'
+import { selectImage } from '../../utils/free'
 
 const emit = defineEmits(['handle-send'])
 const clickFunctions = [
@@ -17,17 +18,7 @@ const clickFunctions = [
     input.value.click()
   },
   () => {
-    content.value =
-      'img:///' +
-      window.api.selectFile({
-        filters: [
-          {
-            name: 'Images',
-            extensions: ['jpg', 'png', 'gif', 'jpeg', 'webp', 'avif', 'bmp', 'sharpp', 'apng']
-          }
-        ],
-        properties: ['openFile']
-      })
+    content.value = `img:///${selectImage()}`
     chatType.value = ChatType.PICTURE
   },
   () => {}
@@ -48,7 +39,7 @@ function sendChat() {
 }
 
 onBeforeMount(() => {
-  chatInputIcons.forEach((icon, index) => {
+  StatefulIcon.ChatInput.forEach((icon, index) => {
     icon.click = clickFunctions[index]
   })
 })
@@ -56,12 +47,12 @@ onBeforeMount(() => {
 
 <template>
   <div class="chat-input">
-    <input id="input" ref="input" class="file" type="file" @change="apis.upload" />
+    <input id="input" ref="input" class="file" type="file" @change="apis.upload($event)" />
     <StatefulButton
-      v-for="(icon, index) in chatInputIcons"
+      v-for="(icon, index) in StatefulIcon.ChatInput"
       :key="index"
       class="icon"
-      :urls="icon"
+      :paths="icon"
       tip
       hover-effect="icon"
     />

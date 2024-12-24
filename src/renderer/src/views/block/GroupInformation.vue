@@ -4,17 +4,17 @@ import IconText from '../../components/base/IconText.vue'
 import ClickInput from '../../components/input/ClickInput.vue'
 import CircularChart from '../../components/data/CircularChart.vue'
 import { useComponentsStore } from '../../store/components'
-import api from '../../services/apis'
+import api from '../../services/api'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '../../store/user'
 import { useRelationshipStore } from '../../store/relationship'
 import { useRouter } from 'vue-router'
 import { Tab } from '../../constants/enums'
-import { Icon } from "../../constants/assets";
+import { Icon } from '../../constants/assets'
 
 const us = useUserStore()
 const rs = useRelationshipStore()
-const componentsStore = useComponentsStore()
+const cs = useComponentsStore()
 
 const router = useRouter()
 const dataset = ref([
@@ -80,7 +80,7 @@ async function afterFocusout2(text) {
 }
 
 async function click() {
-  componentsStore.changeTab(Tab.MESSAGE)
+  cs.changeTab(Tab.MESSAGE)
   await rs.changeChatterUid(rs.displayer.type, rs.displayer.id)
   await router.replace(
     `/main/two/message_group/
@@ -91,7 +91,7 @@ async function click() {
 
 <template>
   <div class="group-information">
-    <div :key="componentsStore.groupInformationKey" class="card">
+    <div :key="cs.groupInformationKey" class="card">
       <div class="header">
         <el-avatar class="head" :src="rs.displayer.info.headUrl" :size="100" />
         <div class="name">{{ rs.displayer.info.name }}</div>
@@ -100,7 +100,7 @@ async function click() {
       <div class="divider"></div>
       <div class="lines">
         <div class="line">
-          <IconText class="item" :icon="Icon.NOTE" text="备注" />
+          <IconText class="item" :icon="Icon.Note" text="备注" />
           <ClickInput
             class="note-input"
             :text="rs.displayer.info.note"
@@ -109,7 +109,7 @@ async function click() {
           />
         </div>
         <div class="line">
-          <IconText class="item" :icon="Icon.PERSON" text="我的本群昵称" />
+          <IconText class="item" :icon="Icon.Person" text="我的本群昵称" />
           <ClickInput
             class="nickname-input"
             :text="rs.displayer.info.nickname"
@@ -118,17 +118,17 @@ async function click() {
           />
         </div>
         <div class="line">
-          <IconText class="item" :icon="Icon.INTRODUCTION" text="群介绍" />
+          <IconText class="item" :icon="Icon.Introduction" text="群介绍" />
           <div class="introduction-text">群主很懒，还没有群介绍哦~</div>
         </div>
         <div class="line">
-          <IconText class="item" :icon="Icon.ANNOUNCEMENT" text="群公告" />
+          <IconText class="item" :icon="Icon.Announcement" text="群公告" />
           <div class="announcement-text">未设置</div>
         </div>
         <div class="line5">
           <IconText
             class="item"
-            :icon="Icon.GROUPING"
+            :icon="Icon.Grouping"
             :text="`群成员(${rs.displayer.info.number}人)`"
           />
           <div class="members-head">
@@ -146,7 +146,7 @@ async function click() {
           </div>
         </div>
         <div class="line6">
-          <IconText class="item" :icon="Icon.PROPORTION" text="成员分布" />
+          <IconText class="item" :icon="Icon.Proportion" text="成员分布" />
           <div class="proportion-charts">
             <CircularChart
               v-for="(data, key) in dataset"

@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { dateFormat } from '../../utils/date'
+import { Icon } from "../../constants/assets";
 
 const props = defineProps({ n: Number, message: Object })
 const emit = defineEmits(['after-click', 'right-click'])
@@ -66,7 +67,7 @@ defineExpose({ setIsActive })
       @click="setIsActive('active')"
       @click.right="rightClick"
     >
-      <el-avatar class="head" :size="40" :src="props.message.headUrl" />
+      <el-avatar class="head" :size="40" :src="props.message.avatarPath" />
       <div :class="nickname_class">
         {{ props.message.nickname }}
       </div>

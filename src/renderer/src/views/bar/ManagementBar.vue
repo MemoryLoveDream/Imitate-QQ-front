@@ -3,20 +3,23 @@ import Tabs from '../../components/Tabs.vue'
 import { onMounted, ref } from 'vue'
 import { useUserStore } from '../../store/user'
 import { useComponentsStore } from '../../store/components'
+import { useRoute } from 'vue-router'
 
-const userStore = useUserStore()
-const componentsStore = useComponentsStore()
+const us = useUserStore()
+const cs = useComponentsStore()
+const route = useRoute()
 const tabs = ref()
+let avatarPath = us.getAvatarPath(route.query.id)
 
 onMounted(() => {
-  componentsStore.tabs = tabs.value
+  cs.tabs = tabs.value
 })
 </script>
 
 <template>
   <div class="management-bar">
     <div class="background"></div>
-    <el-avatar class="avatar" :size="35" :src="userStore.currentUser?.headUrl" @dragstart.prevent />
+    <el-avatar class="avatar" :size="35" :src="avatarPath" @dragstart.prevent />
     <Tabs ref="tabs" class="tabs" />
   </div>
 </template>

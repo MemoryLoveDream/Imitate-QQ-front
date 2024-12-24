@@ -2,7 +2,7 @@
 import StatefulButton from './base/StatefulButton.vue'
 import { onBeforeMount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { tabIcons } from '../constants/assets'
+import { StatefulIcon } from '../constants/assets'
 
 const router = useRouter()
 const clickFunctions = [
@@ -37,7 +37,7 @@ function changeTab(index) {
 defineExpose({ changeTab })
 
 onBeforeMount(() => {
-  tabIcons.forEach((icon, index) => {
+  StatefulIcon.Tabs.forEach((icon, index) => {
     icon.click = clickFunctions[index]
   })
 })
@@ -50,12 +50,12 @@ onMounted(() => {
 <template>
   <div class="tabs">
     <StatefulButton
-      v-for="(tab, index) in tabIcons"
+      v-for="(tab, index) in StatefulIcon.Tabs"
       :key="index"
       ref="tabsRef"
       class="tab"
       :index="index"
-      :urls="tab"
+      :paths="tab"
       tip
       tip-place="right"
       hover-effect="background"

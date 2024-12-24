@@ -6,6 +6,11 @@ export const Tab = {
   EXPLORE: 4
 }
 
+export const VerificationType = {
+  SMS: 1,
+  EMAIL: 2
+}
+
 export const MessageType = {
   PERSON: 1,
   GROUP: 2

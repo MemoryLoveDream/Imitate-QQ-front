@@ -1,13 +1,15 @@
 <script setup>
 import { ArrowDownBold, ArrowUpBold, CloseBold } from '@element-plus/icons-vue'
-import { ref, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 
 const props = defineProps({ placeholder: String, selectableItems: Array })
 const emit = defineEmits(['handle-change', 'delete-item'])
 const text = ref('')
 const show = ref(false)
 const isDown = ref(false)
+const items = ref(props.selectableItems)
 const innerPlaceholder = ref(props.placeholder)
+const itemsRef = ref()
 
 function dropItems() {
   isDown.value = !isDown.value
@@ -18,13 +20,13 @@ function dropItems() {
 }
 
 function selectItem(id) {
-  text.value = String(id)
+  text.value = id
   isDown.value = false
 }
 
 function deleteItem(index, id) {
-  props.selectableItems.splice(index, 1)
-  if (props.selectableItems.length === 0) {
+  items.value.splice(index, 1)
+  if (items.value.length === 0) {
     isDown.value = false
     innerPlaceholder.value = props.placeholder
   }
@@ -41,14 +43,22 @@ function focusout() {
   setTimeout(() => {
     show.value = false
     if (text.value === '') innerPlaceholder.value = props.placeholder
-  }, 200)
+  }, 400)
 }
 
 watch(text, (id) => {
   emit('handle-change', id)
 })
 
+watch(items, (value) => {
+  itemsRef.value.style.height = `${value.length * 60}%`
+})
+
 defineExpose({ text })
+
+onMounted(() => {
+  itemsRef.value.style.height = `${items.value.length * 60}%`
+})
 </script>
 
 <template>
@@ -56,6 +66,7 @@ defineExpose({ text })
     <input
       v-model="text"
       class="input"
+      spellcheck="false"
       :placeholder="innerPlaceholder"
       @focusin="focusin"
       @focusout="focusout"
@@ -67,14 +78,9 @@ defineExpose({ text })
       <ArrowDownBold v-if="!isDown" />
       <ArrowUpBold v-if="isDown" />
     </el-icon>
-    <div v-if="isDown" class="drop-items">
-      <div
-        v-for="(item, index) in props.selectableItems"
-        :key="index"
-        class="item"
-        @click="selectItem(item.id)"
-      >
-        <el-avatar class="item_avatar" :size="15" :src="item.headUrl" />
+    <div v-show="isDown" ref="itemsRef" class="drop-items">
+      <div v-for="(item, index) in items" :key="index" class="item" @click="selectItem(item.id)">
+        <el-avatar class="item_avatar" :size="15" :src="item.avatarPath" />
         <div class="item_text">{{ item.id }}</div>
         <el-icon class="item_clear" @click.stop="deleteItem(index, item.id)">
           <CloseBold />
@@ -85,75 +91,61 @@ defineExpose({ text })
 </template>
 
 <style scoped lang="less">
+@import '../../assets/css/base';
+
 .input {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  transform: translateX(-50%);
-  text-align: center !important;
-  border-width: 0;
-  border-color: transparent;
+  .container();
+  .input-no-border();
+  text-align: center;
   border-radius: 3px;
-  outline: none;
 }
 
 .clear {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  right: 10%;
-  width: 30px;
-  height: 30px;
+  .vertical-center();
+  right: 15%;
+  height: 50%;
+  width: auto;
 }
 
 .drop {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  right: 2%;
-  width: 30px;
-  height: 30px;
+  .vertical-center();
+  right: 5%;
+  height: 50%;
+  width: auto;
 }
 
 .drop-items {
-  position: relative;
+  position: fixed;
   width: 100%;
-  top: 45px;
+  top: 100%;
   max-height: 120px;
 }
 
 .item {
   position: relative;
   width: 100%;
-  height: 40px;
+  height: 80%;
   margin-bottom: 3px;
   background-color: white;
   border-radius: 5px;
   box-shadow: 0 0 10px 2px #999;
-}
 
-.item_avatar {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  left: 2%;
-  width: 25px;
-  height: 25px;
-}
+  .item_avatar {
+    .vertical-center();
+    left: 5%;
+    height: 60%;
+    width: auto;
+  }
 
-.item_text {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
+  .item_text {
+    .center();
+  }
 
-.item_clear {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  right: 2%;
-  width: 30px;
-  height: 30px;
+  .item_clear {
+    .vertical-center();
+    right: 5%;
+    height: 50%;
+    width: auto;
+  }
 }
 </style>

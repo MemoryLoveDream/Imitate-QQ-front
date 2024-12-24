@@ -1,40 +1,32 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { ifEmpty, readJson, writeJson } from '../utils/free'
 
 export const useAssetsStore = defineStore('assets', () => {
-  const assetsLocation = ref()
   const config = ref()
+  const assetsLocation = ref()
   const usersLocation = ref()
 
+  function joinAssetsJson(name) {
+    return `${assetsLocation.value}/${name}.json`
+  }
+
   function initialize() {
-    assetsLocation.value = `${window.api.getProjectPath()}/assets/`
-    config.value = readJson('config')
-    if (config.value.usersLocation === '') usersLocation.value = `${assetsLocation.value}users/`
-  }
-
-  function toJsonUrl(name) {
-    return `${assetsLocation.value}${name}.json`
-  }
-
-  function readJson(name) {
-    return JSON.parse(window.api.read(toJsonUrl(name)))
-  }
-
-  function writeJson(name, data, space = '') {
-    window.api.write(toJsonUrl(name), JSON.stringify(data, null, space))
+    config.value = readJson(joinAssetsJson('config'))
+    assetsLocation.value = `${window.api.getProjectPath()}/assets`
+    usersLocation.value = ifEmpty(config.value.usersLocation, `${assetsLocation.value}/users`)
   }
 
   function finalize() {
-    writeJson('config', config.value, '\t')
+    writeJson(joinAssetsJson('config'), config.value, '\t')
   }
 
   return {
+    config,
     assetsLocation,
     usersLocation,
-    config,
+    joinAssetsJson,
     initialize,
-    readJson,
-    writeJson,
     finalize
   }
 })

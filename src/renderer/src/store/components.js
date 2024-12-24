@@ -25,9 +25,9 @@ export const useComponentsStore = defineStore('components', () => {
     chatDetails.value.sendChat(chat)
   }
 
-  function refreshChatHistory() {
-    chatDetails.value.refresh()
-  }
+  // function refreshChatHistory() {
+  //   chatDetails.value.refresh()
+  // }
 
   function refreshInformationBlock() {
     if (relationshipStore.displayer.type === MessageType.PERSON) personalInformationKey.value++
@@ -44,7 +44,7 @@ export const useComponentsStore = defineStore('components', () => {
     changeTab,
     addChat,
     sendChat,
-    refreshChatHistory,
+    //refreshChatHistory,
     refreshInformationBlock
   }
 })

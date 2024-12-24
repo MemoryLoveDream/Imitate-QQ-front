@@ -1,28 +1,60 @@
 <script setup>
 import CloseButton from '../../components/base/CloseButton.vue'
-import { ref } from 'vue'
-import { CloseBold } from '@element-plus/icons-vue'
-import FunctionalInput from '../../components/input/FunctionalInput.vue'
+import { ref, watch } from 'vue'
+import Input from '../../components/input/Input.vue'
 import { useUserStore } from '../../store/user'
-import api from '../../services/apis'
+import api from '../../services/api'
 import { useRouter } from 'vue-router'
+import { Icon } from '../../constants/assets'
+import { isEmail, isPhoneNumber, selectImage, warningMessage } from "../../utils/free";
+import VerifyInput from '../../components/input/VerifyInput.vue'
 
-const userStore = useUserStore()
+const us = useUserStore()
 const router = useRouter()
-const headUrl = ref('/src/assets/pic/head/head.png')
-const input = ref()
+let avatar = Icon.DefaultAvatar
+const avatarPath = ref(Icon.DefaultAvatar)
+const id = ref()
+const nickname = ref()
 const password = ref()
+const verify = ref()
+const disable = ref(true)
+
+watch(
+  [
+    () => id.value?.text,
+    () => nickname.value?.text,
+    () => password.value?.text,
+    () => verify.value?.text
+  ],
+  ([newId, newNickname, newPassword, newVerify]) => {
+    disable.value = newId === '' || newNickname === '' || newPassword === '' || newVerify === ''
+  }
+)
+
+function handleClick() {
+  api.verify({ id: id.value.text, verify: verify.value.text })
+}
 
 async function register() {
-  let res = await api.register({ nickname: input.value.text, password: password.value.text })
-  if (res.data.code === 200) {
-    userStore.updateLatestLoginedUser(res.data.data, password.value.text)
-    window.api.createWindow('main', 970, 680, `/main?id=${res.data.data}`, {
-      transparent: true,
-      minWidth: 395,
-      minHeight: 550
+  if (!isPhoneNumber(id.value.text) && !isEmail(id.value.text)) warningMessage('号码或邮箱格式错误')
+  else if (password.value.text.length < 6 || password.value.text.length > 20)
+    warningMessage('密码长度应该6到20位')
+  else {
+    let res = await api.register({
+      id: id.value.text,
+      nickname: nickname.value.text,
+      password: password.value.text,
+      verify: verify.value.text
     })
-    window.api.close('login')
+    if (res.data.code === 200) {
+      us.updateLatestLoginedUser(res.data.data, password.value.text)
+      window.api.createWindow('main', 970, 680, `/main?id=${res.data.data}`, {
+        transparent: true,
+        minWidth: 395,
+        minHeight: 550
+      })
+      window.api.close('login')
+    } else warningMessage('号码邮箱不存在或验证码错误')
   }
 }
 
@@ -30,39 +62,37 @@ function change(url) {
   router.replace(url)
 }
 
-function change_head() {
-  headUrl.value =
-    'img:///' +
-    window.api.selectFile({
-      properties: ['openFile']
-    })
-  // window
-  //   .showOpenFilePicker({
-  //     types: [
-  //       {
-  //         accept: { 'image/*': ['.png', '.gif', '.jpeg', '.jpg'] }
-  //       }
-  //     ]
-  //   })
-  //   .then((result) => {
-  //     result[0].getFile().then((result1) => {
-  //       console.log(result1)
-  //     })
-  //     // console.log(result[0].getFile())
-  //   })
+function hover_avatar() {
+  if (avatarPath.value !== Icon.ChangeAvatar) {
+    avatarPath.value = Icon.ChangeAvatar
+  } else {
+    avatarPath.value = avatar
+  }
+}
+
+function change_avatar() {
+  avatar = `img:///${selectImage()}`
+  avatarPath.value = avatar
 }
 </script>
 
 <template>
   <div class="background">
-    <el-avatar class="head" :size="80" :src="headUrl" @click="change_head" />
-    <FunctionalInput class="input" placeholder="输入昵称">
-      <CloseBold />
-    </FunctionalInput>
-    <FunctionalInput class="password" placeholder="输入密码" type="password">
-      <CloseBold />
-    </FunctionalInput>
-    <el-button class="register" color="dodgerblue" @click="register">注册</el-button>
+    <el-avatar
+      class="avatar"
+      :size="80"
+      :src="avatarPath"
+      @mouseover="hover_avatar"
+      @mouseout="hover_avatar"
+      @click="change_avatar"
+    />
+    <Input ref="id" class="id" placeholder="输入注册邮箱或号码" />
+    <Input ref="nickname" class="nickname" placeholder="输入昵称" />
+    <Input ref="password" class="password" placeholder="输入密码" type="password" />
+    <VerifyInput ref="verify" class="verify" placeholder="输入验证码" @handle-click="handleClick" />
+    <el-button class="register" color="dodgerblue" :disabled="disable" @click="register">
+      注册
+    </el-button>
     <div class="login" @click="change('/login')">已有账号</div>
     <CloseButton control="login" />
   </div>
@@ -75,47 +105,43 @@ function change_head() {
   .container();
   .user-cannot-select();
   background-color: aliceblue;
-}
 
-.close {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 32px;
-  height: 25px;
-  border-width: 0;
-  :hover {
-    background-color: red;
+  .input {
+    .horizontal-center();
+    width: 250px;
+    height: 40px;
+  }
+
+  .id {
+    .input();
+    top: 30%;
+  }
+
+  .nickname {
+    .input();
+    top: 42%;
+  }
+
+  .password {
+    .input();
+    top: 54%;
+  }
+
+  .verify {
+    .input();
+    top: 66%;
   }
 }
 
-.head {
+.avatar {
   .horizontal-center();
-  top: 15%;
+  top: 10%;
   background-color: white;
-}
-
-.password {
-  .horizontal-center();
-  top: 40%;
-  width: 250px;
-  height: 40px;
-  text-align: center !important;
-  z-index: 10;
-}
-
-.input {
-  .horizontal-center();
-  top: 55%;
-  width: 250px;
-  height: 40px;
-  z-index: 1;
-  //text-align: center !important;
 }
 
 .register {
   .horizontal-center();
-  top: 70%;
+  top: 78%;
   width: 180px;
   height: 37px;
   border-radius: 5px;

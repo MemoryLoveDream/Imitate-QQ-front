@@ -8,20 +8,19 @@ const props = defineProps({
   left: { type: Number, default: 30 },
   textStyle: String
 })
-
-const img = ref()
-const content = ref()
+const imgRef = ref()
+const textRef = ref()
 
 onMounted(() => {
-  img.value.style.height = `${props.iconRatio}%`
-  content.value.style.left = `${props.left}px`
+  imgRef.value.style.height = `${props.iconRatio}%`
+  textRef.value.style.left = `${props.left}px`
 })
 </script>
 
 <template>
   <div class="container">
-    <img ref="img" :src="props.icon" alt="" />
-    <div ref="content" class="text" :style="props.textStyle">{{ props.text }}</div>
+    <img ref="imgRef" :src="props.icon" alt="" />
+    <div ref="textRef" class="text" :style="props.textStyle">{{ props.text }}</div>
   </div>
 </template>
 

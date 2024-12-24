@@ -5,34 +5,33 @@ import { useRouter, useRoute } from 'vue-router'
 import { useWebSocketStore } from '../store/webSocket'
 import { useRelationshipStore } from '../store/relationship'
 import { useUserStore } from '../store/user'
-import api from '../services/apis'
+import api from '../service/api'
 import WindowButtons from '../components/base/WindowButtons.vue'
 
 const ws = useWebSocketStore()
-const userStore = useUserStore()
-const relationshipStore = useRelationshipStore()
+const us = useUserStore()
+const rs = useRelationshipStore()
 const router = useRouter()
 const route = useRoute()
 const managementBar = ref()
 
 provide(
   'userId',
-  computed(() => userStore.currentUser.id)
+  computed(() => us.currentUser.id)
 )
-provide('getHeadUrl', relationshipStore.getHeadUrl)
 provide(
   'chatterType',
-  computed(() => relationshipStore.chatter.type)
+  computed(() => rs.chatter.relationshipType)
 )
 provide(
   'chatterId',
-  computed(() => relationshipStore.chatter.id)
+  computed(() => rs.chatter.id)
 )
 
 onBeforeMount(async () => {
-  userStore.currentUser = (await api.getUserInfo(route.query.id)).data.data
+  us.currentUser = (await api.getUserInfo(route.query.id)).data.data
   ws.initWebSocket()
-  await relationshipStore.initialize()
+  await rs.initialize()
 })
 
 onMounted(() => {
@@ -64,5 +63,6 @@ onMounted(() => {
   left: 65px;
   width: calc(100% - 65px);
   height: 100%;
+  background-color: white;
 }
 </style>

@@ -2,15 +2,11 @@
 import ChatInput from '../../components/chat/ChatInput.vue'
 import { inject, onBeforeMount, ref, watch } from 'vue'
 import { useRelationshipStore } from '../../store/relationship'
-import { useWebSocketStore } from '../../store/webSocket'
-import { now } from '../../utils/date'
 import StatefulButton from '../../components/base/StatefulButton.vue'
 import { StatefulIcon } from '../../constants/assets'
 import Chat from '../../components/chat/Chat.vue'
 
-const ws = useWebSocketStore()
 const rs = useRelationshipStore()
-const userId = inject('userId')
 const scrollbar = ref()
 const inner = ref()
 const refreshKey = ref(0)
@@ -49,20 +45,6 @@ function scrollToBottom() {
     let h = inner.value.clientHeight
     scrollbar.value.setScrollTop(h)
   }, 100)
-}
-
-function handleSend(chatType, content) {
-  let chat = {
-    senderId: userId.value,
-    sendTime: now(),
-    chatType: chatType,
-    content: content
-  }
-  rs.addChat(rs.chatter.relationshipType, rs.chatter.id, chat)
-  chat.messageType = rs.chatter.relationshipType
-  chat.receiverId = rs.chatter.id
-  delete chat.sendTime
-  ws.sendChat(chat)
 }
 
 onBeforeMount(() => {
@@ -104,7 +86,7 @@ onBeforeMount(() => {
     <!--    Divider  -->
     <div class="divider2"></div>
     <!--    ChatInput  -->
-    <ChatInput class="chat-input" @handle-send="handleSend" />
+    <ChatInput class="chat-input" />
   </div>
 </template>
 

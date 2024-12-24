@@ -1,31 +1,32 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import CloseButton from '../../components/base/CloseButton.vue'
-import FunctionalInput from '../../components/input/FunctionalInput.vue'
+import Input from '../../components/input/Input.vue'
 import SelectInput from '../../components/input/SelectInput.vue'
-import { CloseBold } from '@element-plus/icons-vue'
 import { useUserStore } from '../../store/user'
-import api from '../../services/apis'
-import { ElMessage } from 'element-plus'
+import api from '../../service/api'
 import { useRouter } from 'vue-router'
+import { Icon } from '../../constants/assets'
+import debug from '../../utils/debug'
+import app from "../../utils/app";
 
-const userStore = useUserStore()
+const us = useUserStore()
 const router = useRouter()
-const headUrl = ref('/src/assets/pic/head/head.png')
-const select = ref()
+const avatarPath = ref(Icon.DefaultAvatar)
+const id = ref()
 const password = ref()
+const disable = ref(true)
+
+watch([() => id.value?.text, () => password.value?.text], ([newId, newPassword]) => {
+  disable.value = newId === '' || newPassword === ''
+})
 
 async function login() {
-  let res = await api.login({ id: select.value.text, password: password.value.text })
+  let res = await api.login({ id: id.value.text, password: password.value.text })
   if (res.data.code === 200) {
-    userStore.updateLatestLoginedUser(select.value.text, password.value.text)
-    window.api.createWindow('main', 970, 680, `/main?id=${select.value.text}`, {
-      transparent: true,
-      minWidth: 395,
-      minHeight: 550
-    })
-    window.api.close('login')
-  } else ElMessage({ type: 'warning', message: '账号或密码错误' })
+    us.updateLatestLoginedUser(id.value.text, password.value.text)
+    app.createMainPageWindow(res.data.data, id.value.text)
+  } else debug.warningMessage('账号或密码错误')
 }
 
 function change(url) {
@@ -33,31 +34,28 @@ function change(url) {
 }
 
 function handleChange(id) {
-  if (userStore.loginedUsers.has(Number(id)))
-    headUrl.value = userStore.loginedUsers.get(Number(id)).headUrl
-  else headUrl.value = '/src/assets/pic/head/head.png'
+  if (us.loginedUsers.has(id)) avatarPath.value = us.getAvatarPath(id)
+  else avatarPath.value = Icon.DefaultAvatar
 }
 
 function deleteItem(id) {
-  userStore.loginedUsers.delete(id)
+  us.loginedUsers.delete(id)
 }
 </script>
 
 <template>
   <div class="background">
-    <el-avatar class="head" :size="80" :src="headUrl" />
+    <el-avatar class="avatar" :size="80" :src="avatarPath" />
     <SelectInput
-      ref="select"
-      class="select"
+      ref="id"
+      class="id"
       placeholder="输入账号"
-      :selectable-items="[...userStore.loginedUsers.values()]"
+      :selectable-items="[...us.loginedUsers.values()]"
       @handle-change="handleChange"
       @delete-item="deleteItem"
     />
-    <FunctionalInput ref="password" class="input" placeholder="输入密码" type="password">
-      <CloseBold />
-    </FunctionalInput>
-    <el-button class="login" color="dodgerblue" @click="login">登录</el-button>
+    <Input ref="password" class="password" placeholder="输入密码" type="password" />
+    <el-button class="login" color="dodgerblue" :disabled="disable" @click="login">登录</el-button>
     <div class="register" @click="change('/register')">注册账号</div>
     <CloseButton control="login" />
   </div>
@@ -72,39 +70,25 @@ function deleteItem(id) {
   background-color: aliceblue;
 }
 
-.close {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 32px;
-  height: 25px;
-  border-width: 0;
-  :hover {
-    background-color: red;
-  }
-}
-
-.head {
+.avatar {
   .horizontal-center();
   top: 15%;
   background-color: white;
 }
 
-.select {
+.id {
   .horizontal-center();
   top: 40%;
   width: 250px;
   height: 40px;
-  text-align: center !important;
-  z-index: 10;
+  z-index: 99;
 }
 
-.input {
+.password {
   .horizontal-center();
   top: 55%;
   width: 250px;
   height: 40px;
-  z-index: 1;
 }
 
 .login {

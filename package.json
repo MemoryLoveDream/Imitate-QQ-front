@@ -20,7 +20,7 @@
     "@electron-toolkit/preload": "^2.0.0",
     "@electron-toolkit/utils": "^2.0.0",
     "@element-plus/icons-vue": "^2.3.1",
-    "axios": "^1.7.2",
+    "axios": "1.7.4",
     "dayjs": "^1.11.13",
     "echarts": "^5.5.1",
     "electron-store": "^10.0.0",
@@ -29,6 +29,8 @@
     "pinia": "^2.1.7",
     "pinia-plugin-persistedstate": "^4.0.0-alpha.4",
     "sass": "^1.77.5",
+    "sql.js": "^1.12.0",
+    "sqlite3": "^5.1.7",
     "vue-router": "^4.3.3"
   },
   "devDependencies": {
@@ -36,14 +38,14 @@
     "@rushstack/eslint-patch": "^1.3.3",
     "@vitejs/plugin-vue": "^4.3.1",
     "@vue/eslint-config-prettier": "^8.0.0",
-    "electron": "30.0.0-alpha.3",
+    "electron": "33.2.1",
     "electron-builder": "^24.6.3",
-    "electron-vite": "^1.0.27",
+    "electron-vite": "^2.0.0",
     "eslint": "^8.47.0",
     "eslint-plugin-vue": "^9.17.0",
     "less": "^4.2.0",
     "prettier": "^3.0.2",
-    "vite": "^4.4.9",
+    "vite": "5.4.6",
     "vue": "^3.3.4"
   }
 }

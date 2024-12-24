@@ -6,20 +6,20 @@ import { useRelationshipStore } from './relationship'
 
 export const useWebSocketStore = defineStore('ws', () => {
   const ws = ref()
-  const userStore = useUserStore()
-  const relationshipStore = useRelationshipStore()
+  const us = useUserStore()
+  const rs = useRelationshipStore()
 
   async function webSocketOnMessage(e) {
     let signal = JSON.parse(e.data)
     console.log(e.data)
-    if (signal.signalType === SignalType.SEND_CHAT) {
+    if (signal.signalType === SignalType.MESSAGE) {
       let chat = JSON.parse(signal.content)
       delete chat.receiverId
-      await relationshipStore.addChat(chat.messageType, chat.senderId, chat)
-    } else if (signal.signalType === SignalType.REQUEST_PEER_ID) {
+      await rs.addChat(chat.messageType, chat.senderId, chat)
+    } else if (signal.signalType === SignalType.PEER_ID_REQUEST) {
       let call = JSON.parse(signal.content)
       await window.api.createWindow('video_call', 700, 680, `/video_call/called/${call.callerId}`)
-    } else if (signal.signalType === SignalType.SEND_PEER_ID) {
+    } else if (signal.signalType === SignalType.PEER_ID_SENDING) {
       let peer = JSON.parse(signal.content)
       window.api.setPeerId(peer.peerId)
     }
@@ -36,11 +36,11 @@ export const useWebSocketStore = defineStore('ws', () => {
     anonymousInit()
     ws.value.onopen = () =>
       sendSignal({
-        signalType: SignalType.FIRST_CONNECTION,
-        content: `${userStore.currentUser.id}`
+        signalType: SignalType.CONNECTION,
+        content: `${us.currentUser.id}`
       })
     window.addEventListener('beforeunload', function () {
-      sendSignal({ signalType: SignalType.DISCONNECTION, content: `${userStore.currentUser.id}` })
+      sendSignal({ signalType: SignalType.DISCONNECTION, content: `${us.currentUser.id}` })
       ws.value.close()
     })
   }
@@ -50,19 +50,19 @@ export const useWebSocketStore = defineStore('ws', () => {
   }
 
   function sendChat(chat) {
-    sendSignal({ signalType: SignalType.SEND_CHAT, content: JSON.stringify(chat) })
+    sendSignal({ signalType: SignalType.MESSAGE, content: JSON.stringify(chat) })
   }
 
   function requestPeerId(callerId, calleeId) {
     sendSignal({
-      signalType: SignalType.REQUEST_PEER_ID,
+      signalType: SignalType.PEER_ID_REQUEST,
       content: JSON.stringify({ callerId: callerId, calleeId: calleeId })
     })
   }
 
   function sendPeerId(callerId, peerId) {
     sendSignal({
-      signalType: SignalType.SEND_PEER_ID,
+      signalType: SignalType.PEER_ID_SENDING,
       content: JSON.stringify({ callerId: callerId, peerId: peerId })
     })
   }

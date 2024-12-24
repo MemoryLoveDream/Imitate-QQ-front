@@ -6,7 +6,7 @@ export function now() {
   return dayjs().format()
 }
 
-export function dateFormat(sendTime, now = dayjs()) {
+export function messageFormat(sendTime, now = dayjs()) {
   if (sendTime === '') return ''
   let date = dayjs(sendTime)
   let gapDay = now.diff(date, 'day')
@@ -16,7 +16,7 @@ export function dateFormat(sendTime, now = dayjs()) {
   else return date.format('YYYY/MM/DD')
 }
 
-export function timeFormat(sendTime, now = dayjs()) {
+export function tipFormat(sendTime, now = dayjs()) {
   if (sendTime === '') return ''
   let date = dayjs(sendTime)
   let gapDay = now.diff(date, 'day')
@@ -24,4 +24,11 @@ export function timeFormat(sendTime, now = dayjs()) {
   else if (gapDay === 1) return '昨天' + date.format('HH:mm')
   else if (gapDay < 7) return Weekdays[date.day() - 1] + ' ' + date.format('HH:mm')
   else return date.format('YYYY/MM/DD HH:mm')
+}
+
+export function chatFormat(sendTime, now = dayjs()) {
+  if (sendTime === '') return ''
+  let date = dayjs(sendTime)
+  if (date.year() === now.year()) return date.format('MM-DD HH:mm:ss')
+  else return date.format('YYYY-MM-DD HH:mm:ss')
 }

@@ -1,9 +1,10 @@
 <script setup>
 import { onMounted, ref, watch } from 'vue'
+import { State } from '../../constants/enums'
 
 const props = defineProps({
   index: Number,
-  urls: Object,
+  paths: Object,
   ratio: { type: Number, default: 60 },
   tip: Boolean,
   tipPlace: {
@@ -21,52 +22,52 @@ const props = defineProps({
   alterable: Boolean
 })
 const emit = defineEmits(['after-click'])
-const status = ref('inactive')
-const url = ref(props.urls.inactive_url)
+const state = ref(State.INACTIVE)
+const path = ref(props.paths.inactive_path)
 const btn = ref()
 const icon = ref()
 
-watch(status, (value) => {
-  if (value === 'inactive') {
-    url.value = props.urls.inactive_url
+watch(state, (value) => {
+  if (value === State.INACTIVE) {
+    path.value = props.paths.inactive_path
     btn.value.style.backgroundColor = 'transparent'
   } else {
     if (props.hoverEffect === 'background') btn.value.style.backgroundColor = '#e0e0e0'
     if (
-      value === 'hovering' &&
+      value === State.HOVERING &&
       props.hoverEffect === 'icon' &&
-      props.urls.hovering_url !== undefined
+      props.paths.hovering_path !== undefined
     )
-      url.value = props.urls.hovering_url
-    else if (value === 'active' && props.urls.active_url !== undefined)
-      url.value = props.urls.active_url
+      path.value = props.paths.hovering_path
+    else if (value === State.ACTIVE && props.paths.active_path !== undefined)
+      path.value = props.paths.active_path
   }
 })
 
-function mouseover() {
-  if (status.value === 'inactive') status.value = 'hovering'
+function hover() {
+  if (state.value === State.INACTIVE) state.value = State.HOVERING
 }
 
-function mouseout() {
-  if (status.value === 'hovering') status.value = 'inactive'
+function leave() {
+  if (state.value === State.HOVERING) state.value = State.INACTIVE
 }
 
-function click(event) {
+function activate(event) {
   if (
-    (status.value === 'inactive' || status.value === 'hovering') &&
-    props.urls.active_url !== undefined
+    (state.value === State.INACTIVE || state.value === State.HOVERING) &&
+    props.paths.active_path !== undefined
   )
-    status.value = 'active'
-  else if (status.value === 'active' && props.alterable) status.value = 'inactive'
-  props.urls.click?.(event, status.value)
+    state.value = State.ACTIVE
+  else if (state.value === State.ACTIVE && props.alterable) state.value = State.INACTIVE
+  props.paths.click?.(event, state.value)
   emit('after-click', props.index)
 }
 
-function setIsActive(bool) {
-  status.value = bool ? 'active' : 'inactive'
+function setState(state1) {
+  state.value = state1
 }
 
-defineExpose({ setIsActive })
+defineExpose({ setState })
 
 onMounted(() => {
   icon.value.style.width = `${props.ratio}%`
@@ -75,16 +76,16 @@ onMounted(() => {
 </script>
 
 <template>
-  <div ref="btn" class="btn" @mouseover="mouseover" @mouseout="mouseout" @click="click">
+  <div ref="btn" class="btn" @mouseover="hover" @mouseout="leave" @click="activate">
     <el-tooltip
       :disabled="!props.tip"
-      :content="props.urls.name"
+      :content="props.paths.name"
       :placement="props.tipPlace"
       effect="light"
       :show-arrow="false"
       :show-after="200"
     >
-      <img ref="icon" alt="" :src="url" />
+      <img ref="icon" alt="" :src="path" />
     </el-tooltip>
   </div>
 </template>

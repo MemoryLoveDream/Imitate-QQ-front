@@ -42,11 +42,26 @@ const api = {
   getProjectPath: () => {
     return ipcRenderer.sendSync('get-project-path')
   },
-  makeDir: (name) => {
-    ipcRenderer.sendSync('make-dir', name)
+  mkdir: (name) => {
+    ipcRenderer.sendSync('mkdir', name)
   },
-  downloadFile: (url, path) => {
-    ipcRenderer.invoke('download-file', url, path).then(() => {})
+  downloadFile: (request, path) => {
+    ipcRenderer.invoke('download-file', request, path).then(() => {})
+  },
+  connectDatabase: (path) => {
+    ipcRenderer.invoke('connect-database', path).then(() => {})
+  },
+  databaseRun: (sql, param) => {
+    ipcRenderer.sendSync('database-run', sql, param)
+  },
+  databaseGet: (sql, param) => {
+    return ipcRenderer.sendSync('database-get', sql, param)
+  },
+  databaseAll: (sql, param) => {
+    return ipcRenderer.sendSync('database-all', sql, param)
+  },
+  databaseEach: (sql, param, callback) => {
+    ipcRenderer.sendSync('database-each', sql, param, callback)
   },
   setPeerId: (id) => {
     ipcRenderer.sendSync('set-peer-id', id)

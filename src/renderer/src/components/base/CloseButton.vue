@@ -3,24 +3,16 @@ import { CloseBold } from '@element-plus/icons-vue'
 import { ref } from 'vue'
 
 const props = defineProps({ control: { type: String, default: 'main' } })
-const close_color = ref('#333')
+const iconColor = ref('#333')
 
 function close() {
   window.api.close(props.control)
 }
-
-function mouseover() {
-  close_color.value = 'white'
-}
-
-function mouseout() {
-  close_color.value = '#333'
-}
 </script>
 
 <template>
-  <div class="close" @click="close" @mouseover="mouseover" @mouseout="mouseout">
-    <el-icon class="icon" :color="close_color">
+  <div class="close" @click="close" @mouseover="iconColor = 'white'" @mouseout="iconColor = '#333'">
+    <el-icon class="icon" :color="iconColor">
       <CloseBold />
     </el-icon>
   </div>

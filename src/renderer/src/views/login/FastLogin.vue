@@ -1,22 +1,19 @@
 <script setup>
 import CloseButton from '../../components/base/CloseButton.vue'
-import api from '../../services/apis'
+import api from '../../service/api'
 import { useUserStore } from '../../store/user'
 import { useRouter } from 'vue-router'
+import app from '../../utils/app'
 
-const userStore = useUserStore()
+const us = useUserStore()
 const router = useRouter()
-const { id, password } = userStore.latestLoginedUser
-const { nickname, headUrl } = userStore.loginedUsers.get(id)
+const { id, password } = us.latestLoginedUser
+const { nickname, avatarPath } = us.loginedUsers.get(id)
 
 async function fastLogin() {
-  if ((await api.login({ id: id, password: password })).data.code === 200) {
-    window.api.createWindow('main', 970, 680, `/main?id=${id}`, {
-      transparent: true,
-      minWidth: 395,
-      minHeight: 550
-    })
-    window.api.close('login')
+  let res = await api.login({ id: id, password: password })
+  if (res.data.code === 200) {
+    app.createMainPageWindow(res.data.data, id)
   }
 }
 
@@ -28,7 +25,7 @@ function change(url) {
 <template>
   <div class="fast-login">
     <div class="logo">逛逛</div>
-    <el-avatar class="head" :size="100" :src="headUrl" />
+    <el-avatar class="avatar" :size="100" :src="avatarPath" />
     <div class="nickname">{{ nickname }}</div>
     <el-button class="login" color="dodgerblue" @click="fastLogin">登录</el-button>
     <div class="add_account" @click="change('/login')">切换账号</div>
@@ -39,21 +36,17 @@ function change(url) {
 </template>
 
 <style scoped lang="less">
+@import '../../assets/css/base';
+
 .fast-login {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  user-select: none;
+  .container();
+  .user-cannot-select();
   background-color: aliceblue;
 }
 
 .logo {
-  position: absolute;
+  .horizontal-center();
   top: 10%;
-  left: 50%;
-  transform: translateX(-50%);
   font-size: 25px;
   font-weight: bold;
   background: linear-gradient(to right, dodgerblue, pink);
@@ -62,30 +55,24 @@ function change(url) {
   -webkit-text-fill-color: transparent;
 }
 
-.head {
-  position: absolute;
+.avatar {
+  .horizontal-center();
   top: 25%;
-  left: 50%;
-  transform: translateX(-50%);
 }
 
 .nickname {
-  position: absolute;
+  .horizontal-center();
   top: 55%;
-  left: 50%;
-  transform: translateX(-50%);
   font-size: 18px;
   color: black;
 }
 
 .login {
-  position: absolute;
+  .horizontal-center();
   top: 70%;
-  left: 50%;
   width: 180px;
   height: 37px;
   border-radius: 5px;
-  transform: translateX(-50%);
 }
 
 .add_account {
@@ -97,12 +84,10 @@ function change(url) {
 }
 
 .divider {
-  position: absolute;
+  .horizontal-center();
   top: 90%;
-  left: 50%;
   color: gainsboro;
   font-size: 12px;
-  transform: translateX(-50%);
 }
 
 .exit_account {

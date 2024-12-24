@@ -6,9 +6,10 @@ import fs from 'fs'
 import { dialog } from 'electron'
 
 const path = require('path')
-const axios = require('axios')
+const sqlite3 = require('sqlite3')
 const windowMap = new Map()
 let peerId = ''
+let database
 
 const consoleShortcutKeys = ['A', 'Q', 'W', 'E', 'R', 'T']
 const keySet = new Set()
@@ -52,7 +53,6 @@ function createWindow(name, width, height, router, others = {}) {
     keySet.delete(key)
     globalShortcut.unregister(`CommandOrControl+${key}`)
   })
-
   newWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url).then()
     return { action: 'deny' }
@@ -143,20 +143,49 @@ ipcMain.on('get-project-path', (event) => {
   event.returnValue = process.env['INIT_CWD']
 })
 
-ipcMain.on('make-dir', (event, name) => {
+ipcMain.on('mkdir', (event, name) => {
   fs.mkdirSync(name)
 })
 
-ipcMain.handle('download-file', async (event, url, path) => {
-  const writer = fs.createWriteStream(path)
-  const response = await axios({
-    url,
-    method: 'GET',
-    responseType: 'stream'
-  })
-  response.data.pipe(writer)
+ipcMain.handle('download-file', async (event, request, path) => {
+  ;(await request).data.pipe(fs.createWriteStream(path))
 })
+
 //其它处理
+ipcMain.handle('connect-database', (event, path) => {
+  database = new sqlite3.Database(path, function (err) {
+    if (err) console.error('连接数据库错误：' + err.message)
+  })
+  database.run(
+    'create table if not exists message (messageType integer, senderId text, receiverId text, ' +
+      'sendTime text, chatType integer, content text);'
+  )
+})
+
+ipcMain.on('database-run', (event, sql, param) => {
+  database.run(sql, param, function (err) {
+    if (err) console.error(err)
+  })
+})
+
+ipcMain.on('database-get', (event, sql, param) => {
+  database.get(sql, param, function (err, row) {
+    if (err) console.error(err)
+    else event.returnValue = row
+  })
+})
+
+ipcMain.on('database-all', (event, sql, param) => {
+  database.all(sql, param, function (err, rows) {
+    if (err) console.error(err)
+    else event.returnValue = rows
+  })
+})
+
+ipcMain.on('database-each', (event, sql, param, callback) => {
+  database.each(sql, param, callback)
+})
+
 ipcMain.on('set-peer-id', (event, id) => {
   peerId = id
 })

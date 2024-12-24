@@ -1,10 +1,10 @@
 <script setup>
-const url = '/src/assets/pic/background/none.svg'
+import { Picture } from '../../constants/assets'
 </script>
 
 <template>
   <div class="none-block" @dragstart.prevent>
-    <img :src="url" alt="" />
+    <img :src="Picture.NoneBlock" alt="" />
   </div>
 </template>
 
@@ -18,10 +18,9 @@ const url = '/src/assets/pic/background/none.svg'
 }
 
 img {
-  position: absolute;
+  .center();
   width: 40%;
   height: auto;
-  .center();
   opacity: 0.5;
 }
 </style>

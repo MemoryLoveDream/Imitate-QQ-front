@@ -3,15 +3,12 @@ import { onMounted, ref } from 'vue'
 import { Plus, Search } from '@element-plus/icons-vue'
 import Message from '../../components/card/Message.vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useComponentsStore } from '../../store/components'
 import { useRelationshipStore } from '../../store/relationship'
-import { MessageType } from '../../constants/enums'
-import { messageBarIcons } from '../../constants/assets'
+import { MessageType, State } from '../../constants/enums'
+import { Icon } from '../../constants/assets'
 import IconText from '../../components/base/IconText.vue'
-import apis from "../../services/apis";
 
 const rs = useRelationshipStore()
-const cs = useComponentsStore()
 const router = useRouter()
 const route = useRoute()
 const text = ref('')
@@ -21,15 +18,14 @@ const frame = ref()
 const frameVisible = ref(false)
 
 async function afterSelect(n, type, id) {
-  await rs.changeChatterUid(type, id)
-  if (type === MessageType.PERSON) await router.replace('/main/two/message_person/none')
+  rs.chatter = await rs.getInfo(type, id)
+  if (type === MessageType.FRIEND) await router.replace('/main/two/message_friend/none')
   else await router.replace('/main/two/message_group/none')
   if (selected.value !== n) {
     if (selected.value !== -1) {
-      messagesRef.value[selected.value].setIsActive('inactive')
-      cs.refreshChatHistory()
+      messagesRef.value[selected.value].setState(State.INACTIVE)
     }
-    rs.messageList[n].unread = 0
+    rs.messageList.get(n).unread = 0
     selected.value = n
   }
 }
@@ -54,8 +50,8 @@ function rightClick(event) {
 
 function setMessageActive(index) {
   selected.value = index
-  messagesRef.value[index].setIsActive('active')
-  rs.messageList[index].unread = 0
+  messagesRef.value[index].setState(State.ACTIVE)
+  rs.messageList.get(index).unread = 0
 }
 
 defineExpose({ setMessageActive })
@@ -78,10 +74,10 @@ onMounted(() => {
     </el-button>
     <div class="messages">
       <Message
-        v-for="(message, index) in rs.messageList"
+        v-for="(message, index) in rs.messageList.getList()"
         ref="messagesRef"
         :key="index"
-        :n="index"
+        :index="index"
         :message="message"
         class="message"
         @after-click="afterSelect"
@@ -89,7 +85,7 @@ onMounted(() => {
       />
     </div>
     <div v-show="frameVisible" ref="frame" class="frame">
-      <div v-for="(icon, index) in messageBarIcons" :key="index" class="shadow">
+      <div v-for="(icon, index) in Icon.MessageBar" :key="index" class="shadow">
         <IconText class="item" :icon="icon.icon" :text="icon.text" />
       </div>
     </div>

@@ -48,10 +48,10 @@ const router = createRouter({
               }
             },
             {
-              path: 'message_person/:index',
+              path: 'message_friend/:index',
               components: {
                 first: () => import('../views/bar/MessageBar.vue'),
-                second: () => import('../views/block/PersonalChatBlock.vue')
+                second: () => import('../views/block/FriendChatBlock.vue')
               }
             },
             {
@@ -69,10 +69,10 @@ const router = createRouter({
               }
             },
             {
-              path: 'relationship_person',
+              path: 'relationship_friend',
               components: {
                 first: () => import('../views/bar/RelationshipBar.vue'),
-                second: () => import('../views/block/PersonalInformation.vue')
+                second: () => import('../views/block/FriendInformation.vue')
               }
             },
             {

@@ -1,66 +1,73 @@
 <script setup>
 import { ref, watch } from 'vue'
+import api from '../../service/api'
+import { RelationshipType, State } from '../../constants/enums'
+import string from '../../utils/string'
 
 const props = defineProps({ code: Object, info: Object })
 const emit = defineEmits(['after-select'])
 
-const message_class = ref('message')
-const nickname_class = ref('nickname')
-const signature_class = ref('signature')
-const name_class = ref('name')
-const status = ref('inactive')
+const messageClass = ref('message')
+const nicknameClass = ref('nickname')
+const signatureClass = ref('signature')
+const nameClass = ref('name')
+const status = ref(State.INACTIVE)
 
 watch(status, (value) => {
-  if (value === 'active') {
-    message_class.value = 'message_active'
-    nickname_class.value = 'nickname_active'
-    signature_class.value = 'signature_active'
-    name_class.value = 'name_active'
-  } else if (value === 'hover') {
-    message_class.value = 'message_hover'
-    nickname_class.value = 'nickname'
-    signature_class.value = 'signature'
-    name_class.value = 'name'
+  if (value === State.ACTIVE) {
+    messageClass.value = 'message-active'
+    nicknameClass.value = 'nickname-active'
+    signatureClass.value = 'signature-active'
+    nameClass.value = 'name-active'
+  } else if (value === State.HOVERING) {
+    messageClass.value = 'message-hover'
+    nicknameClass.value = 'nickname'
+    signatureClass.value = 'signature'
+    nameClass.value = 'name'
   } else {
-    message_class.value = 'message'
-    nickname_class.value = 'nickname'
-    signature_class.value = 'signature'
-    name_class.value = 'name'
+    messageClass.value = 'message'
+    nicknameClass.value = 'nickname'
+    signatureClass.value = 'signature'
+    nameClass.value = 'name'
   }
 })
 
 function mouseOver() {
-  if (status.value === 'inactive') status.value = 'hover'
+  if (status.value === State.INACTIVE) status.value = State.HOVERING
 }
 
 function mouseOut() {
-  if (status.value === 'hover') status.value = 'inactive'
+  if (status.value === State.HOVERING) status.value = State.INACTIVE
 }
 
 function click() {
-  status.value = 'active'
+  status.value = State.ACTIVE
   emit('after-select', props.code, props.info)
 }
 
 function setInactive() {
-  status.value = 'inactive'
+  status.value = State.INACTIVE
 }
 
 defineExpose({ setInactive })
 </script>
 
 <template>
-  <div :class="message_class" @mouseover="mouseOver" @mouseout="mouseOut" @click="click">
-    <el-avatar class="head" :size="40" :src="props.info.headUrl" />
-    <div v-if="props.info.type === 1">
-      <div id="nickname_id" :class="nickname_class">
-        {{ props.info.nickname }}
+  <div :class="messageClass" @mouseover="mouseOver" @mouseout="mouseOut" @click="click">
+    <el-avatar
+      class="head"
+      :size="40"
+      :src="api.getAvatarPath(props.info.relationshipType, props.info.id)"
+    />
+    <div v-if="props.info.relationshipType === RelationshipType.FRIEND">
+      <div :class="nicknameClass">
+        {{ string.joinIfExists(props.info.nickname, props.info.note) }}
       </div>
-      <div id="latest_message_id" :class="signature_class">
-        {{ props.info.signature }}
-      </div>
+      <div :class="signatureClass">{{ props.info.signature }}</div>
     </div>
-    <div v-if="props.info.type === 2" :class="name_class">{{ props.info.name }}</div>
+    <div v-if="props.info.relationshipType === RelationshipType.GROUP" :class="nameClass">
+      {{ string.joinIfExists(props.info.name, props.info.note) }}
+    </div>
   </div>
 </template>
 
@@ -73,12 +80,12 @@ defineExpose({ setInactive })
   user-select: none;
 }
 
-.message_hover {
+.message-hover {
   .message();
   background-color: whitesmoke;
 }
 
-.message_active {
+.message-active {
   .message();
   background-color: #0099ff;
 }
@@ -97,7 +104,7 @@ defineExpose({ setInactive })
   color: black;
 }
 
-.nickname_active {
+.nickname-active {
   .nickname();
   color: white;
 }
@@ -114,7 +121,7 @@ defineExpose({ setInactive })
   white-space: nowrap;
 }
 
-.signature_active {
+.signature-active {
   .signature();
   color: white;
 }
@@ -128,7 +135,7 @@ defineExpose({ setInactive })
   color: black;
 }
 
-.name_active {
+.name-active {
   .name();
   color: white;
 }

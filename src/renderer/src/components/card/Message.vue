@@ -1,23 +1,24 @@
 <script setup>
 import { ref, watch } from 'vue'
-import { dateFormat } from '../../utils/date'
+import { messageFormat } from '../../utils/date'
+import { State } from '../../constants/enums'
 
-const props = defineProps({ n: Number, message: Object })
+const props = defineProps({ index: Number, message: Object })
 const emit = defineEmits(['after-click', 'right-click'])
 
 const message_class = ref('message')
 const nickname_class = ref('nickname')
 const date_class = ref('date')
 const content_class = ref('content')
-const status = ref('inactive')
+const status = ref(State.INACTIVE)
 
 watch(status, (value) => {
-  if (value === 'active') {
+  if (value === State.ACTIVE) {
     message_class.value = 'message_active'
     nickname_class.value = 'nickname_active'
     date_class.value = 'date_active'
     content_class.value = 'content_active'
-  } else if (value === 'hover') {
+  } else if (value === State.HOVERING) {
     message_class.value = 'message_hover'
     nickname_class.value = 'nickname'
     date_class.value = 'date'
@@ -31,24 +32,24 @@ watch(status, (value) => {
 })
 
 function mouseOver() {
-  if (status.value === 'inactive') status.value = 'hover'
+  if (status.value === State.INACTIVE) status.value = State.HOVERING
 }
 
 function mouseOut() {
-  if (status.value === 'hover') status.value = 'inactive'
+  if (status.value === State.HOVERING) status.value = State.INACTIVE
 }
 
-function setIsActive(status1) {
+function setState(status1) {
   status.value = status1
-  if (status1 === 'active')
-    emit('after-click', props.n, props.message.messageType, props.message.id)
+  if (status1 === State.ACTIVE)
+    emit('after-click', props.index, props.message.messageType, props.message.id)
 }
 
 function rightClick(event) {
   emit('right-click', event)
 }
 
-defineExpose({ setIsActive })
+defineExpose({ setState })
 </script>
 
 <template>
@@ -63,14 +64,14 @@ defineExpose({ setIsActive })
       :class="message_class"
       @mouseover="mouseOver"
       @mouseout="mouseOut"
-      @click="setIsActive('active')"
+      @click="setState(State.ACTIVE)"
       @click.right="rightClick"
     >
-      <el-avatar class="head" :size="40" :src="props.message.headUrl" />
+      <el-avatar class="head" :size="40" :src="props.message.avatarPath" />
       <div :class="nickname_class">
         {{ props.message.nickname }}
       </div>
-      <div :class="date_class">{{ dateFormat(props.message?.sendTime) }}</div>
+      <div :class="date_class">{{ messageFormat(props.message?.sendTime) }}</div>
       <div :class="content_class">
         {{ props.message?.content }}
       </div>

@@ -1,215 +1,152 @@
 import { defineStore } from 'pinia'
 import { computed, reactive, ref } from 'vue'
 import { useUserStore } from './user'
-import { ChatType, MessageType } from '../constants/enums'
-import api from '../services/apis'
+import { ChatType, MessageType, RelationshipType } from '../constants/enums'
+import api from '../service/api'
+import { SetList } from '../utils/struct'
+import sql from '../service/sql'
+import file from '../utils/file'
+import array from '../utils/array'
 
-export const useRelationshipStore = defineStore(
-  'relationship',
-  () => {
-    const userStore = useUserStore()
-    //PersonalInfo
-    //{id,nickname,headUrl,email,sex,note,grouping,signature,country,location,status}
-    //GroupInfo
-    //{id,name,headUrl,nickname,note,role,introduction,announcement,number,leaderHeadUrl,memberHeadUrls}
-    //LatestMessage
-    //{senderId,groupId,nickname,headUrl,sendTime,messageType,chatType,content,unread}
-    //MemberInfo
-    //{type,id,nickname,headUrl,signature}
-    //Chat
-    //{senderId,headUrl,sendTime,messageType,chatType,content}
-    const messageList = ref([])
-    const relationships = reactive(new Map())
-    const chatHistory = reactive(new Map())
-    const messages = reactive(new Set())
-    const chatter = ref({ type: null, id: null, info: null, history: null })
-    const displayer = ref({ type: null, id: null, info: null })
-    const personalGroupingTypes = ref(['我'])
+export const useRelationshipStore = defineStore('relationship', () => {
+  const us = useUserStore()
+  //PersonalInfo
+  //{id,nickname,sex,note,grouping,signature,country,location,status}
+  //GroupInfo
+  //{id,name,nickname,note,role,introduction,announcement,number,leader,members}
+  //LatestMessage
+  //{senderId,groupId,nickname,sendTime,messageType,chatType,content,unread}
+  //Chat
+  //{senderId,sendTime,messageType,chatType,content}
+  const relationships = reactive(new Map())
+  const messageList = reactive(new SetList())
+  const chatter = ref({ relationshipType: null, id: null, info: null, history: null })
+  const displayer = ref({ relationshipType: null, id: null, info: null })
 
-    function readJson(name) {
-      return userStore.readJson(`${userStore.currentUser.id}/${name}`)
-    }
-
-    function writeJson(name, data, space = '') {
-      window.api.write(`${userStore.currentUser.id}${name}`, JSON.stringify(data, null, space))
-    }
-
-    function uid(type, id) {
-      return `${type === MessageType.PERSON ? 's' : 'g'}${id}`
-    }
-
-    function uid1(item) {
-      return uid(item.messageType, item.id)
-    }
-
-    async function changeChatterUid(type, id) {
-      chatter.value.type = type
-      chatter.value.id = id
-      chatter.value.info = await getInfo(type, id)
-      chatter.value.history = await getChatHistory(type, id)
-    }
-
-    async function changeInfoUid(type, id) {
-      displayer.value.type = type
-      displayer.value.id = id
-      displayer.value.info = await getInfo(type, id)
-    }
-
-    async function initialize() {
-      relationships.set(uid(MessageType.PERSON, userStore.currentUser.id), userStore.currentUser)
-      let newMessages = (await api.getNewMessages(userStore.currentUser.id)).data.data
-      newMessages.forEach((item) => messages.add(uid1(item)))
-      let temp = [].concat(newMessages)
-      let oldMessages = readJson('message_list')
-      if (Array.isArray(oldMessages)) {
-        oldMessages.forEach((item) => {
-          if (!messages.has(uid1(item))) {
-            messages.add(uid1(item))
-            temp.push(item)
-          }
-        })
-      }
-      for (let item of temp) {
-        await getInfo(item.messageType, item.id)
-        await getChatHistory(item.messageType, item.id)
-        messageList.value.push(createMessage(item.messageType, item.id))
-      }
-      newMessages.forEach((item) => {
-        chatHistory.get(uid1(item)).unread += item.unread
-        chatHistory.get(uid1(item)).details.push(...item.chats)
-      })
-
-      personalGroupingTypes.value = (
-        await api.getPersonalGroupingTypes(userStore.currentUser.id)
-      ).data.data
-    }
-
-    function createMessage(type, id) {
-      let uuid = uid(type, id)
-      let message = {}
-      message.messageType = type
-      message.id = id
-      message.headUrl = computed(() => relationships.get(uuid).headUrl)
-      message.nickname = computed(() => {
-        let chatter = relationships.get(uuid)
-        let note = chatter.note
-        return note === ''
-          ? message.messageType === MessageType.PERSON
-            ? chatter.nickname
-            : chatter.name
-          : note
-      })
-      message.sendTime = computed(() => {
-        let details = chatHistory.get(uuid).details
-        return details.length === 0 ? '' : details[details.length - 1].sendTime
-      })
-      message.chatType = computed(() => {
-        let details = chatHistory.get(uuid).details
-        return details.length === 0 ? '' : details[details.length - 1].chatType
-      })
-      message.content = computed(() => {
-        let details = chatHistory.get(uuid).details
-        return message.chatType.value === ChatType.PICTURE
-          ? '[图片]'
-          : details.length === 0
-            ? ''
-            : details[details.length - 1].content
-      })
-      message.unread = computed({
-        get() {
-          return chatHistory.get(uuid).unread
-        },
-        set(value) {
-          chatHistory.get(uuid).unread = value
-        }
-      })
-      return message
-    }
-
-    async function addMessage(type, id) {
-      let uuid = uid(type, id)
-      if (!messages.has(uuid)) {
-        await getInfo(type, id)
-        await getChatHistory(type, id)
-        let message = createMessage(type, id)
-        messages.add(uuid)
-        messageList.value.unshift(message)
-        return 0
-      } else
-        for (let index in messageList.value)
-          if (messageList.value[index].messageType === type && messageList.value[index].id === id)
-            return index
-    }
-
-    async function getInfo(type, id) {
-      let uuid = uid(type, id)
-      if (!relationships.has(uuid)) {
-        let data = { i: userStore.currentUser.id, you: id }
-        let res =
-          type === MessageType.PERSON
-            ? await api.getPersonalInfo(data)
-            : await api.getGroupInfo(data)
-        relationships.set(uuid, res.data.data)
-      }
-      return relationships.get(uuid)
-    }
-
-    async function getChatHistory(type, id) {
-      let uuid = uid(type, id)
-      if (!chatHistory.has(uuid)) {
-        let chats = readJson(uuid)
-        if (Object.keys(chats).length === 0) chats = { unread: 0, details: [] }
-        else {
-          let details = chats.details
-          let newDetails = []
-          for (let chat of details) {
-            await getInfo(type, id)
-            let newChat = {}
-            for (let i = 0; i < 4; i++) {
-              newChat[['senderId', 'sendTime', 'chatType', 'content'][i]] = chat[i]
-            }
-            newChat.senderId = newChat.senderId === 1 ? userStore.currentUser.id : id
-            newDetails.push(newChat)
-          }
-          chats.details = newDetails
-        }
-        chatHistory.set(uuid, chats)
-      }
-      return chatHistory.get(uuid)
-    }
-
-    async function addChat(type, id, chat) {
-      let history = await getChatHistory(type, id)
-      if (chatter.value.type !== type || chatter.value.id !== id) history.unread += 1
-      history.details.push(chat)
-    }
-
-    function getHeadUrl(id) {
-      return relationships.get(uid(MessageType.PERSON, id)).headUrl
-    }
-
-    function finalize() {
-      writeJson('message_list', messageList)
-    }
-
-    return {
-      messageList,
-      personalGroupingTypes,
-      chatter,
-      displayer,
-      relationships,
-      chatHistory,
-      uid,
-      changeChatterUid,
-      changeInfoUid,
-      initialize,
-      finalize,
-      addMessage,
-      getInfo,
-      addChat,
-      getChatHistory,
-      getHeadUrl
-    }
+  function joinRelationshipJson(id) {
+    return us.joinUsersJson(`${us.currentUser.id}/${id}`)
   }
-  // { persist: true }
-)
+
+  function getDatabase() {
+    return us.joinDatabase(`${us.currentUser.id}/message`)
+  }
+
+  async function initialize() {
+    window.api.connectDatabase(getDatabase())
+    relationships.set(us.currentUser.id, us.currentUser)
+    let newMessages = (await api.listNewMessages(us.currentUser.id)).data.data
+    let messages = new SetList()
+    messages.load(newMessages)
+    messages.soleLoad(file.readJson(joinRelationshipJson('message_list')))
+    for (let item of messages.list) {
+      await getInfo(item.messageType, item.id)
+    }
+    newMessages.forEach((item) => {
+      relationships.get(item.id).history.unread += item.unread
+      relationships.get(item.id).history.chats.push(...item.chats)
+    })
+    messages.list.forEach((item) => messageList.push(createMessage(item.messageType, item.id)))
+  }
+
+  function createMessage(type, id) {
+    let message = {}
+    message.messageType = type
+    message.id = id
+    message.avatarPath = api.getAvatarPath(type, id)
+    message.nickname = computed(() => {
+      let chatter = relationships.get(id).info
+      let note = chatter.note
+      return note === ''
+        ? message.messageType === MessageType.FRIEND
+          ? chatter.nickname
+          : chatter.name
+        : note
+    })
+    message.sendTime = computed(() => {
+      let chats = relationships.get(id).history.chats
+      return chats.length === 0 ? '' : chats[chats.length - 1].sendTime
+    })
+    message.chatType = computed(() => {
+      let chats = relationships.get(id).history.chats
+      return chats.length === 0 ? '' : chats[chats.length - 1].chatType
+    })
+    message.content = computed(() => {
+      let chats = relationships.get(id).history.chats
+      return message.chatType.value === ChatType.PICTURE
+        ? '[图片]'
+        : chats.length === 0
+          ? ''
+          : chats[chats.length - 1].content
+    })
+    message.unread = computed({
+      get() {
+        return relationships.get(id).history.unread
+      },
+      set(value) {
+        relationships.get(id).history.unread = value
+      }
+    })
+    return message
+  }
+
+  function addMessage(type, id) {
+    if (!messageList.has(id)) {
+      messageList.unshift(createMessage(type, id))
+      return 0
+    } else return messageList.getIndex(id)
+  }
+
+  async function getInfo(type, id) {
+    if (!relationships.has(id)) {
+      let relationship = { relationshipType: type, id: id, info: null, history: null }
+      //getInfo
+      let data = { i: us.currentUser.id, you: id }
+      let res =
+        type === RelationshipType.FRIEND
+          ? await api.getFriendInfo(data)
+          : await api.getGroupInfo(data)
+      relationship.info = res.data.data
+      //getHistory
+      let history = file.readJson(joinRelationshipJson(id))
+      if (Object.keys(history).length === 0) history = { unread: 0, chats: [] }
+      else {
+        let chats = sql.listFriendMessages(array.becomePalindrome([id, us.currentUser.id]))
+        for (let item of chats) {
+          if (item['chatType'] === ChatType.FILE) {
+            item['content'] = {
+              name: item['content'].split(',')[0],
+              size: item['content'].split(',')[1]
+            }
+          }
+        }
+        console.log(chats)
+        history.chats = chats
+      }
+      relationship.history = history
+      relationships.set(id, relationship)
+    }
+    return relationships.get(id)
+  }
+
+  function addChat(type, id, chat) {
+    if (chatter.value.relationshipType !== type || chatter.value.id !== id)
+      relationships.get(id).history.unread += 1
+    relationships.get(id).history.chats.push(chat)
+  }
+
+  function finalize() {
+    file.writeJson(joinRelationshipJson('message_list'), messageList.list)
+  }
+
+  return {
+    relationships,
+    messageList,
+    chatter,
+    displayer,
+    initialize,
+    finalize,
+    addMessage,
+    getInfo,
+    addChat
+  }
+})

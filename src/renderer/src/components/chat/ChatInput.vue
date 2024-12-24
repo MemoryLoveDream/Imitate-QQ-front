@@ -1,54 +1,75 @@
 <script setup>
 import StatefulButton from '../base/StatefulButton.vue'
-import { onBeforeMount, ref, watch } from 'vue'
-import { chatInputIcons } from '../../constants/assets'
-import { ChatType } from '../../constants/enums'
-import apis from '../../services/apis'
+import { inject, onBeforeMount, ref, watch } from 'vue'
+import { StatefulIcon } from '../../constants/assets'
+import { ChatType, RelationshipType } from '../../constants/enums'
+import api from '../../service/api'
+import { useRelationshipStore } from '../../store/relationship'
+import { now } from '../../utils/date'
+import { useWebSocketStore } from '../../store/webSocket'
 
-const emit = defineEmits(['handle-send'])
+const rs = useRelationshipStore()
+const ws = useWebSocketStore()
+const userId = inject('userId')
+const chatType = ref(ChatType.TEXT)
+const content = ref()
+const format = ref('*')
+const btnClickable = ref(true)
+const frameVisible = ref(false)
+const fileSelector = ref()
+
 const clickFunctions = [
   (event) => {
     frameVisible.value = !frameVisible.value
     console.log(event.clientX)
     console.log(event.clientY)
-    console.log()
   },
   () => {
-    input.value.click()
+    format.value = '*'
+    setTimeout(() => {
+      fileSelector.value.click()
+    }, 0)
+    chatType.value = ChatType.FILE
   },
   () => {
-    content.value =
-      'img:///' +
-      window.api.selectFile({
-        filters: [
-          {
-            name: 'Images',
-            extensions: ['jpg', 'png', 'gif', 'jpeg', 'webp', 'avif', 'bmp', 'sharpp', 'apng']
-          }
-        ],
-        properties: ['openFile']
-      })
+    format.value = 'image/*'
+    setTimeout(() => {
+      fileSelector.value.click()
+    }, 0)
     chatType.value = ChatType.PICTURE
   },
-  () => {}
+  () => {
+    chatType.value = ChatType.VOICE
+  }
 ]
-const chatType = ref(ChatType.TEXT)
-const content = ref('')
-const btnClickable = ref(true)
-const frameVisible = ref(false)
-const input = ref()
 
 watch(content, (value) => {
   btnClickable.value = value === ''
 })
 
+function handleFile(event) {
+  let file = event.target.files[0]
+  content.value = { name: file.name, size: file.size }
+  api.upload(file, RelationshipType.FRIEND, rs.chatter.id, '')
+}
+
 function sendChat() {
-  emit('handle-send', chatType.value, content.value)
+  let chat = {
+    senderId: userId.value,
+    sendTime: now(),
+    chatType: chatType.value,
+    content: content.value
+  }
+  rs.addChat(rs.chatter.relationshipType, rs.chatter.id, chat)
+  chat.messageType = rs.chatter.relationshipType
+  chat.receiverId = rs.chatter.id
+  delete chat.sendTime
+  ws.sendChat(chat)
   content.value = ''
 }
 
 onBeforeMount(() => {
-  chatInputIcons.forEach((icon, index) => {
+  StatefulIcon.ChatInput.forEach((icon, index) => {
     icon.click = clickFunctions[index]
   })
 })
@@ -56,12 +77,12 @@ onBeforeMount(() => {
 
 <template>
   <div class="chat-input">
-    <input id="input" ref="input" class="file" type="file" @change="apis.upload" />
+    <input ref="fileSelector" class="file" type="file" :accept="format" @change="handleFile" />
     <StatefulButton
-      v-for="(icon, index) in chatInputIcons"
+      v-for="(icon, index) in StatefulIcon.ChatInput"
       :key="index"
       class="icon"
-      :urls="icon"
+      :paths="icon"
       tip
       hover-effect="icon"
     />
